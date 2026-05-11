@@ -1,0 +1,57 @@
+DROP DATABASE IF EXISTS db12636;
+CREATE DATABASE db12636;
+USE db12636;
+
+CREATE TABLE users_pass (
+    id BIGINT UNSIGNED AUTO_INCREMENT,
+    pass BINARY(16) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE users_email (
+    id BIGINT UNSIGNED AUTO_INCREMENT,
+    email VARBINARY(254) NOT NULL UNIQUE,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE users (
+    id BIGINT UNSIGNED AUTO_INCREMENT,
+    name VARCHAR(30) NOT NULL,
+    surname VARCHAR(30) NOT NULL,
+    pfp BLOB NOT NULL,
+    email BIGINT UNSIGNED NOT NULL UNIQUE,
+    pass BIGINT UNSIGNED UNIQUE,
+    is_google BOOL NOT NULL,
+    CHECK ((is_google AND pass IS NULL) OR (NOT is_google AND pass IS NOT NULL)),
+    PRIMARY KEY (id),
+    FOREIGN KEY (email) REFERENCES users_email(id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT,
+    FOREIGN KEY (pass) REFERENCES users_pass(id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT
+);
+
+CREATE TABLE users_poi (
+    user_id BIGINT UNSIGNED,
+    osm_id BIGINT UNSIGNED,
+    does_like BOOL NOT NULL DEFAULT FALSE,
+    favourite BOOL NOT NULL DEFAULT FALSE,
+    comment VARCHAR(255),
+    PRIMARY KEY (user_id, osm_id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT
+);
+
+CREATE TABLE users_reserve_poi (
+    id BIGINT UNSIGNED AUTO_INCREMENT,
+    user_id BIGINT UNSIGNED,
+    osm_id BIGINT UNSIGNED,
+    start DATE NOT NULL,
+    end DATE NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT
+);
