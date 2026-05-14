@@ -1,8 +1,11 @@
 package edu.fauser.tpsit.progettotpsit.obj;
 
+import com.password4j.Hash;
 import edu.fauser.tpsit.progettotpsit.helper.HashHelper;
 import edu.fauser.tpsit.progettotpsit.singleton.EnvVar;
 
+import java.io.InputStream;
+import java.math.BigInteger;
 import java.sql.*;
 import java.util.Optional;
 
@@ -20,22 +23,34 @@ public class DBConnection implements AutoCloseable
     }
     public Optional<Long> retrieveUserID(String email, String pass) throws SQLException
     {
-        try (ResultSet res = con.createStatement().executeQuery("SELECT u.id, up.pass " +
-                                                                "FROM users AS u " +
-                                                                "INNER JOIN users_pass AS up ON u.pass = up.id " +
-                                                                "INNER JOIN users_email AS ue ON u.email = ue.id " +
-                                                                "WHERE ue.email = '" + email + "'"))
+        try (CallableStatement stmt = con.prepareCall("{? = CALL get_user_info(?, ?)}"))
         {
-            return (res.next() && HashHelper.checkHash(pass, res.getBytes("pass")) ? Optional.of(res.getLong("uid")) : Optional.empty());
+            stmt.registerOutParameter(1, Types.BIGINT);
+            stmt.registerOutParameter("@pass", Types.BINARY);
+            stmt.setString("@email", email);
+            stmt.execute();
+            return (HashHelper.checkHash(pass, stmt.getBytes("@pass")) ? Optional.of(stmt.getLong(1)) : Optional.empty());
         }
     }
     public Optional<String> retrieveUserName(Long uid) throws SQLException
     {
         try (ResultSet res = con.createStatement().executeQuery("SELECT u.name, u.surname " +
-                "FROM users AS u " +
-                "WHERE u.id = " + uid))
+                                                                "FROM users AS u " +
+                                                                "WHERE u.id = " + uid))
         {
             return (res.next() ? Optional.of(res.getString("name") + " " + res.getString("surname")) : Optional.empty());
+        }
+    }
+    public void insertUser(String name, String surname, String email, String pass, InputStream pfp) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL insert_user(?, ?, ?, ?, ?)}"))
+        {
+            stmt.setString("@name", name);
+            stmt.setString("@surname", surname);
+            stmt.setString("@email", email);
+            stmt.setBytes("@pass", HashHelper.scrypt(pass).getBytes());
+            stmt.setBlob("@pfp", pfp);
+            stmt.execute();
         }
     }
     @Override
