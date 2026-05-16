@@ -1,5 +1,6 @@
 package edu.fauser.tpsit.progettotpsit.controller;
 
+import edu.fauser.tpsit.progettotpsit.helper.ServletHelper;
 import edu.fauser.tpsit.progettotpsit.obj.DBConnection;
 
 import javax.servlet.*;
@@ -7,6 +8,7 @@ import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Optional;
 
 @WebServlet(name = "LoginServlet", value = "/login")
 public class LoginServlet extends HttpServlet
@@ -37,42 +39,42 @@ public class LoginServlet extends HttpServlet
         }
     }
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
     {
-        if (request.getSession().getAttribute("uid") != null)
-            response.sendRedirect("load");
-        else
+        ServletHelper.checkSession(request, response, "uid", this::manageNewSession, this::manageExistingSession);
+    }
+    private void manageExistingSession(HttpServletRequest request, HttpServletResponse response)
+    {
+        try
         {
-            try
+            response.sendRedirect("load");
+        }
+        catch (IOException e)
+        {
+            log(e.getMessage(), e);
+        }
+    }
+    private void manageNewSession(HttpServletRequest request, HttpServletResponse response)
+    {
+        try
+        {
+            Optional<Long> t;
+            if (ServletHelper.checkParams(request, "email", "pass") && (t = con.retrieveUserID(request.getParameter("email"), request.getParameter("pass"))).isPresent())
             {
-                con.retrieveUserID(request.getParameter("email"), request.getParameter("password")).ifPresentOrElse(
-                        (id) -> {
-                            request.getSession().setAttribute("uid", id);
-                            try
-                            {
-                                response.sendRedirect("load");
-                            }
-                            catch (IOException e)
-                            {
-                                log(e.getMessage(), e);
-                            }
-                        },
-                        () -> {
-                            try
-                            {
-                                request.getSession().invalidate();
-                                response.sendRedirect("error.jsp");
-                            }
-                            catch (IOException e)
-                            {
-                                log(e.getMessage(), e);
-                            }
-                        });
+                request.getSession().setAttribute("uid", t.get());
+                response.sendRedirect("load");
             }
-            catch (SQLException e)
+            else
             {
-                log(e.getMessage(), e);
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                request.getSession().invalidate();
+                request.setAttribute("error_mx", "Utente non trovato");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
             }
+        }
+        catch (SQLException | IOException | ServletException e)
+        {
+            log(e.getMessage(), e);
         }
     }
 }
