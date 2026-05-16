@@ -59,6 +59,13 @@
             <artifactId>password4j</artifactId>
             <version>1.8.4</version>
         </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/javax.mail/javax.mail-api -->
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
+            <version>1.6.2</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
