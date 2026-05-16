@@ -13,15 +13,12 @@ import java.util.Optional;
 
 public class DBConnection implements AutoCloseable
 {
+    private static final String DBURL = "jdbc:mysql://" + EnvVar.getInstance().getEnv().get("DB_HOST", "localhost") + ":3306/db12636";
     private final Connection con;
     public DBConnection() throws SQLException
     {
         DriverManager.registerDriver(new com.mysql.jdbc.Driver());
-        con = DriverManager.getConnection(getDBURL(), EnvVar.getInstance().getEnv().get("DB_ROOT"), EnvVar.getInstance().getEnv().get("DB_ROOT_PSW"));
-    }
-    private static String getDBURL()
-    {
-        return "jdbc:mysql://" + EnvVar.getInstance().getEnv().get("DB_HOST", "localhost") + ":3306/db12636";
+        con = DriverManager.getConnection(DBURL, EnvVar.getInstance().getEnv().get("DB_ROOT"), EnvVar.getInstance().getEnv().get("DB_ROOT_PSW"));
     }
     public Optional<Long> retrieveNormalUserID(String email, String pass) throws SQLException
     {
