@@ -32,6 +32,10 @@ public class ServletHelper
             onValid.accept(request, response);
         return true;
     }
+    public static boolean checkSession(HttpServletRequest request, String att)
+    {
+        return checkSession(request, null, att, null, null);
+    }
     public static boolean checkParams(HttpServletRequest request, String... params)
     {
         return checkParams(request, null, null, null, params);
