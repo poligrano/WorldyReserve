@@ -59,7 +59,7 @@ public class LoginServlet extends HttpServlet
         try
         {
             Optional<Long> t;
-            if (ServletHelper.checkParams(request, "email", "pass") && (t = con.retrieveUserID(request.getParameter("email"), request.getParameter("pass"))).isPresent())
+            if (ServletHelper.checkParams(request, "email", "pass") && (t = con.retrieveNormalUserID(request.getParameter("email"), request.getParameter("pass"))).isPresent())
             {
                 request.getSession().setAttribute("uid", t.get());
                 response.sendRedirect("load");

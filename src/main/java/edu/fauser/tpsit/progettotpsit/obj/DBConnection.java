@@ -21,15 +21,15 @@ public class DBConnection implements AutoCloseable
     {
         return "jdbc:mysql://" + EnvVar.getInstance().getEnv().get("DB_HOST", "localhost") + ":3306/db12636";
     }
-    public Optional<Long> retrieveUserID(String email, String pass) throws SQLException
+    public Optional<Long> retrieveNormalUserID(String email, String pass) throws SQLException
     {
-        try (CallableStatement stmt = con.prepareCall("{? = CALL get_user_info(?, ?)}"))
+        try (CallableStatement stmt = con.prepareCall("{CALL GET_NORMAL_USER_INFO(?, ?, ?)}"))
         {
-            stmt.registerOutParameter(1, Types.BIGINT);
-            stmt.registerOutParameter("@pass", Types.BINARY);
-            stmt.setString("@email", email);
+            stmt.registerOutParameter("v_id", Types.BIGINT);
+            stmt.registerOutParameter("v_pass", Types.BINARY);
+            stmt.setString("v_email", email);
             stmt.execute();
-            return (HashHelper.checkHash(pass, stmt.getBytes("@pass")) ? Optional.of(stmt.getLong(1)) : Optional.empty());
+            return (stmt.getLong("v_id") != 0 && HashHelper.checkHash(pass, stmt.getBytes("v_pass")) ? Optional.of(stmt.getLong("v_id")) : Optional.empty());
         }
     }
     public Optional<String> retrieveUserName(Long uid) throws SQLException
@@ -41,15 +41,15 @@ public class DBConnection implements AutoCloseable
             return (res.next() ? Optional.of(res.getString("name") + " " + res.getString("surname")) : Optional.empty());
         }
     }
-    public void insertUser(String name, String surname, String email, String pass, InputStream pfp) throws SQLException
+    public void insertNormalUser(String name, String surname, String email, String pass, InputStream pfp) throws SQLException
     {
         try (CallableStatement stmt = con.prepareCall("{CALL insert_user(?, ?, ?, ?, ?)}"))
         {
-            stmt.setString("@name", name);
-            stmt.setString("@surname", surname);
-            stmt.setString("@email", email);
-            stmt.setBytes("@pass", HashHelper.scrypt(pass).getBytes());
-            stmt.setBlob("@pfp", pfp);
+            stmt.setString("v_name", name);
+            stmt.setString("v_surname", surname);
+            stmt.setString("v_email", email);
+            stmt.setBytes("v_pass", HashHelper.scrypt(pass).getBytes());
+            stmt.setBlob("v_pfp", pfp);
             stmt.execute();
         }
     }

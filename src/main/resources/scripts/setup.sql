@@ -10,27 +10,25 @@ CREATE TABLE users_pass (
 
 CREATE TABLE users_email (
     id BIGINT UNSIGNED AUTO_INCREMENT,
-    email VARBINARY(254) NOT NULL UNIQUE,
+    email VARCHAR(254) NOT NULL UNIQUE,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE users (
     id BIGINT UNSIGNED AUTO_INCREMENT,
+    gid BIGINT UNSIGNED,
     name VARCHAR(30) NOT NULL,
     surname VARCHAR(30) NOT NULL,
     pfp BLOB,
     email BIGINT UNSIGNED NOT NULL UNIQUE,
     pass BIGINT UNSIGNED UNIQUE,
-    is_google BOOL NOT NULL DEFAULT FALSE,
-    CHECK ((is_google AND pass IS NULL) OR (NOT is_google AND pass IS NOT NULL)),
+    CHECK ((gid IS NULL AND pass IS NOT NULL) OR (gid IS NOT NULL AND pass IS NULL)),
     PRIMARY KEY (id),
-    FOREIGN KEY (email) REFERENCES users_email(id)
-        ON DELETE CASCADE
-        ON UPDATE RESTRICT,
+    FOREIGN KEY (email) REFERENCES users_email(id),
     FOREIGN KEY (pass) REFERENCES users_pass(id)
-        ON DELETE CASCADE
-        ON UPDATE RESTRICT
 );
+
+CREATE UNIQUE INDEX google_id ON users(gid);
 
 CREATE TABLE users_poi (
     user_id BIGINT UNSIGNED,
@@ -56,32 +54,48 @@ CREATE TABLE users_reserve_poi (
         ON UPDATE RESTRICT
 );
 
-CREATE PROCEDURE insert_user(@name VARCHAR(30), @surname VARCHAR(30), @pfp BLOB, @email VARCHAR(254), @pass BINARY(16))
+CREATE PROCEDURE INSERT_NORMAL_USER(v_name VARCHAR(30), v_surname VARCHAR(30), v_pfp BLOB, v_email VARCHAR(254), v_pass BINARY(16))
 BEGIN
-    DECLARE @pass_id BIGINT UNSIGNED;
-    DECLARE @email_id BIGINT UNSIGNED;
+    DECLARE v_pass_id BIGINT UNSIGNED;
+    DECLARE v_email_id BIGINT UNSIGNED;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
         END;
     START TRANSACTION;
     INSERT INTO users_pass(pass)
-    VALUES (@pass);
-    SET @pass_id = LAST_INSERT_ID();
+    VALUES (v_pass);
+    SET v_pass_id = LAST_INSERT_ID();
     INSERT INTO users_email(email)
-    VALUES (@email);
-    SET @email_id = LAST_INSERT_ID();
+    VALUES (v_email);
+    SET v_email_id = LAST_INSERT_ID();
     INSERT INTO users(name, surname, pfp, email, pass)
-    VALUES (@name, @surname, @pfp, @email_id, @pass_id);
+    VALUES (v_name, v_surname, v_pfp, v_email_id, v_pass_id);
     COMMIT;
 END;
 
-CREATE FUNCTION get_user_info(@email VARCHAR(254), OUT @pass BINARY(16)) RETURNS BIGINT UNSIGNED
+CREATE PROCEDURE INSERT_GOOGLE_USER(v_name VARCHAR(30), v_surname VARCHAR(30), v_pfp BLOB, v_email VARCHAR(254), v_gid BIGINT UNSIGNED)
 BEGIN
-    DECLARE uid BIGINT UNSIGNED;
-    SELECT  uid = u.id, @pass = up.pass
+    DECLARE v_email_id BIGINT UNSIGNED;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+        END;
+    START TRANSACTION;
+    INSERT INTO users_email(email)
+    VALUES (v_email);
+    SET v_email_id = LAST_INSERT_ID();
+    INSERT INTO users(name, surname, pfp, email, gid)
+    VALUES (v_name, v_surname, v_pfp, v_email_id, v_gid);
+    COMMIT;
+END;
+
+CREATE PROCEDURE GET_NORMAL_USER_INFO(v_email VARCHAR(254), OUT v_pass BINARY(16), OUT v_id BIGINT UNSIGNED)
+BEGIN
+    SELECT  v_id = u.id, v_pass = up.pass
     FROM    users AS u
             INNER JOIN users_pass AS up ON u.pass = up.id
             INNER JOIN users_email AS ue ON u.email = ue.id
-    WHERE   ue.email = @email;
+    WHERE   u.gid IS NULL
+            AND ue.email = v_email;
 END;
