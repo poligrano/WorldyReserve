@@ -65,12 +65,7 @@ public class LoginServlet extends HttpServlet
                 response.sendRedirect("load");
             }
             else
-            {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                request.getSession().invalidate();
-                request.setAttribute("error_mx", "Utente non trovato");
-                request.getRequestDispatcher("error.jsp").forward(request, response);
-            }
+                ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_FORBIDDEN, "Accesso non riuscito", "login", true);
         }
         catch (SQLException | IOException | ServletException e)
         {

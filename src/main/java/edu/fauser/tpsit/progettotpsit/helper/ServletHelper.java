@@ -1,11 +1,14 @@
 package edu.fauser.tpsit.progettotpsit.helper;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.function.BiConsumer;
 
 public class ServletHelper
 {
+    public static String ERROR_PAGE_FOLDER = "errorPage";
     public static boolean checkParams(HttpServletRequest request, HttpServletResponse response, BiConsumer<HttpServletRequest, HttpServletResponse> onInvalid, BiConsumer<HttpServletRequest, HttpServletResponse> onValid, String... params)
     {
         for (String p : params)
@@ -39,5 +42,13 @@ public class ServletHelper
     public static boolean checkParams(HttpServletRequest request, String... params)
     {
         return checkParams(request, null, null, null, params);
+    }
+    public static void redirectErrorPage(HttpServletRequest request, HttpServletResponse response, int statusCode, String errorMx, String errorContext, boolean invalidateSession) throws ServletException, IOException
+    {
+        response.setStatus(statusCode);
+        request.setAttribute("error_mx", errorMx);
+        if (invalidateSession)
+            request.getSession().invalidate();
+        request.getRequestDispatcher(ERROR_PAGE_FOLDER + "/" + errorContext + "Error.jsp").forward(request, response);
     }
 }
