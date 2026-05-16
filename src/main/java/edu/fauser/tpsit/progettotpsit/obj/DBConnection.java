@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.Optional;
+import java.util.UUID;
 
 public class DBConnection implements AutoCloseable
 {
@@ -40,16 +41,18 @@ public class DBConnection implements AutoCloseable
             return (res.next() ? Optional.of(res.getString("name") + " " + res.getString("surname")) : Optional.empty());
         }
     }
-    public void insertNormalUser(String name, String surname, String email, String pass, Part pfp) throws SQLException, IOException
+    public String insertNormalUser(String name, String surname, String email, String pass, Part pfp) throws SQLException, IOException
     {
-        try (CallableStatement stmt = con.prepareCall("{CALL insert_user(?, ?, ?, ?, ?)}"))
+        try (CallableStatement stmt = con.prepareCall("{CALL insert_user(?, ?, ?, ?, ?, ?)}"))
         {
+            stmt.registerOutParameter("v_code", Types.CHAR);
             stmt.setString("v_name", name);
             stmt.setString("v_surname", surname);
             stmt.setString("v_email", email);
             stmt.setBytes("v_pass", HashHelper.scrypt(pass).getBytes());
             stmt.setBlob("v_pfp", (pfp == null ? null : pfp.getInputStream()));
             stmt.execute();
+            return stmt.getString("v_code");
         }
     }
     @Override

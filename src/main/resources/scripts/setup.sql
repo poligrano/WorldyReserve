@@ -24,11 +24,37 @@ CREATE TABLE users (
     pass BIGINT UNSIGNED UNIQUE,
     CHECK ((gid IS NULL AND pass IS NOT NULL) OR (gid IS NOT NULL AND pass IS NULL)),
     PRIMARY KEY (id),
-    FOREIGN KEY (email) REFERENCES users_email(id),
+    FOREIGN KEY (email) REFERENCES users_email(id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT,
     FOREIGN KEY (pass) REFERENCES users_pass(id)
+        ON DELETE SET NULL
+        ON UPDATE RESTRICT
 );
 
 CREATE UNIQUE INDEX google_id ON users(gid);
+
+CREATE TABLE users_verify (
+    id BIGINT UNSIGNED,
+    code BINARY(16) NOT NULL DEFAULT UNHEX(SYS_GUID()),
+    expiration TIMESTAMP NOT NULL DEFAULT (NOW() + INTERVAL 20 MINUTE),
+    PRIMARY KEY (id),
+    FOREIGN KEY (id) REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT
+);
+
+CREATE UNIQUE INDEX confirm_code ON users_verify(code);
+
+CREATE EVENT purge_non_verified
+ON SCHEDULE EVERY 10 MINUTE
+DO  DELETE FROM  users
+    WHERE   id IN
+    (
+        SELECT  uv.id
+        FROM    users_verify AS uv
+        WHERE   uv.expiration < NOW()
+    );
 
 CREATE TABLE users_poi (
     user_id BIGINT UNSIGNED,
@@ -54,10 +80,11 @@ CREATE TABLE users_reserve_poi (
         ON UPDATE RESTRICT
 );
 
-CREATE PROCEDURE INSERT_NORMAL_USER(v_name VARCHAR(30), v_surname VARCHAR(30), v_pfp BLOB, v_email VARCHAR(254), v_pass BINARY(16))
+CREATE PROCEDURE INSERT_NORMAL_USER(v_name VARCHAR(30), v_surname VARCHAR(30), v_pfp BLOB, v_email VARCHAR(254), v_pass BINARY(16), OUT v_code CHAR(32))
 BEGIN
     DECLARE v_pass_id BIGINT UNSIGNED;
     DECLARE v_email_id BIGINT UNSIGNED;
+    DECLARE v_user_id BIGINT UNSIGNED;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
@@ -71,6 +98,10 @@ BEGIN
     SET v_email_id = LAST_INSERT_ID();
     INSERT INTO users(name, surname, pfp, email, pass)
     VALUES (v_name, v_surname, v_pfp, v_email_id, v_pass_id);
+    SET v_user_id = LAST_INSERT_ID();
+    SET v_code = SYS_GUID();
+    INSERT INTO users_verify(id, code)
+    VALUES (v_user_id, UNHEX(v_code));
     COMMIT;
 END;
 
@@ -97,5 +128,24 @@ BEGIN
             INNER JOIN users_pass AS up ON u.pass = up.id
             INNER JOIN users_email AS ue ON u.email = ue.id
     WHERE   u.gid IS NULL
-            AND ue.email = v_email;
+            AND ue.email = v_email
+            AND u.id NOT IN
+            (
+                SELECT  uv.id
+                FROM    users_verify AS uv
+            );
+END;
+
+CREATE PROCEDURE VERIFY_USER(v_code BINARY(16), OUT v_is_verified BOOL)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+        END;
+    START TRANSACTION;
+    DELETE FROM users_verify
+    WHERE   code = v_code
+            AND expiration >= NOW();
+    v_is_verified = (ROW_COUNT() = 1);
+    COMMIT;
 END;
