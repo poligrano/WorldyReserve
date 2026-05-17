@@ -1,17 +1,13 @@
 package edu.fauser.tpsit.progettotpsit.obj;
 
-import com.password4j.Hash;
 import edu.fauser.tpsit.progettotpsit.helper.HashHelper;
 import edu.fauser.tpsit.progettotpsit.singleton.EnvVar;
 
 import javax.servlet.http.Part;
 import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
 import java.sql.*;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.UUID;
 
 public class DBConnection implements AutoCloseable
 {
@@ -82,7 +78,7 @@ public class DBConnection implements AutoCloseable
         NotFound(0),
         FoundButExpired(-1);
         private final int code;
-        private SCVerify(int code)
+        SCVerify(int code)
         {
             this.code = code;
         }

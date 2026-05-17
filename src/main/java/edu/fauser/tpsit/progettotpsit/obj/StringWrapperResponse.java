@@ -1,6 +1,5 @@
 package edu.fauser.tpsit.progettotpsit.obj;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.CharArrayWriter;
