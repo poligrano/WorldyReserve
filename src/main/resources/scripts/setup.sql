@@ -22,7 +22,6 @@ CREATE TABLE users (
     pfp BLOB,
     email BIGINT UNSIGNED NOT NULL UNIQUE,
     pass BIGINT UNSIGNED UNIQUE,
-    CHECK ((gid IS NULL AND pass IS NOT NULL) OR (gid IS NOT NULL AND pass IS NULL)),
     PRIMARY KEY (id),
     FOREIGN KEY (email) REFERENCES users_email(id)
         ON DELETE CASCADE
@@ -161,14 +160,17 @@ BEGIN
     SELECT  uv.expiration INTO v_exp
     FROM    users_verify AS uv
     WHERE   uv.code = v_byte_code;
-    IF v_exp IS NULL THEN
-        SET v_sc = 0;
-    ELSEIF v_exp < v_now THEN
-        v_sc = -1;
-    ELSE
-        DELETE FROM users_verify
-        WHERE   code = v_byte_code;
-        v_sc = ROW_COUNT();
-    END IF;
+    CASE
+        WHEN v_exp IS NULL THEN
+            SET v_sc = 0;
+        WHEN v_exp < v_now THEN
+            SET v_sc = -1;
+        ELSE
+            BEGIN
+            DELETE FROM users_verify
+            WHERE   code = v_byte_code;
+            SET v_sc = ROW_COUNT();
+            END;
+    END CASE;
     COMMIT;
 END;
