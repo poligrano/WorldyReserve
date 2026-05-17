@@ -1,5 +1,5 @@
 <jsp:useBean id="error_mx" scope="request" type="java.lang.String"/>
-<%@ page contentType="text/html;charset=UTF-8" language="java" session="false" isErrorPage="true" %>
+<%@ page contentType="text/html;charset=UTF-8" session="false" isErrorPage="true" %>
 <script>
     alert('${error_mx}');
 </script>

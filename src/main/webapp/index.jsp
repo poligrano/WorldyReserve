@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" session="false" errorPage="errorPage/loginError.jsp" %>
+<%@ page contentType="text/html;charset=UTF-8" session="false" errorPage="errorPage/loginError.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <c:if test='${pageContext.request.getSession(false) != null && pageContext.request.getSession(false).getAttribute("uid") != null}'>
     <c:redirect url="load" />
@@ -22,5 +22,6 @@
         <input type="submit" value="Accedi" />
         <br />
     </form>
+    <p>Non hai ancora un profilo? <a href="signin.jsp">registrati</a></p>
 </body>
 </html>
