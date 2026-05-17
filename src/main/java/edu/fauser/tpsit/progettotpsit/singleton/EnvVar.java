@@ -8,7 +8,7 @@ public class EnvVar
     private final Dotenv env;
     private EnvVar()
     {
-        env = Dotenv.configure().directory("../../../../../../resources").load();
+        env = Dotenv.configure().directory(getClass().getClassLoader().getResource("/env").getPath()).load();
     }
     public static EnvVar getInstance()
     {
