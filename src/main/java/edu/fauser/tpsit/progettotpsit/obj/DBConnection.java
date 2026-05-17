@@ -22,11 +22,11 @@ public class DBConnection implements AutoCloseable
     {
         try (CallableStatement stmt = con.prepareCall("{CALL GET_NORMAL_USER_INFO(?, ?, ?)}"))
         {
-            stmt.registerOutParameter("v_id", Types.BIGINT);
-            stmt.registerOutParameter("v_pass", Types.BINARY);
-            stmt.setString("v_email", email);
+            stmt.setString(1, email);
+            stmt.registerOutParameter(2, Types.BINARY);
+            stmt.registerOutParameter(3, Types.BIGINT);
             stmt.execute();
-            return (stmt.getLong("v_id") != 0 && HashHelper.checkHash(pass, stmt.getBytes("v_pass")) ? Optional.of(stmt.getLong("v_id")) : Optional.empty());
+            return (stmt.getLong(3) != 0 && HashHelper.checkHash(pass, stmt.getBytes(2)) ? Optional.of(stmt.getLong(3)) : Optional.empty());
         }
     }
     public Optional<String> retrieveUserName(Long uid) throws SQLException
@@ -42,25 +42,25 @@ public class DBConnection implements AutoCloseable
     {
         try (CallableStatement stmt = con.prepareCall("{CALL INSERT_NORMAL_USER(?, ?, ?, ?, ?, ?)}"))
         {
-            stmt.registerOutParameter("v_code", Types.CHAR);
-            stmt.setString("v_name", name);
-            stmt.setString("v_surname", surname);
-            stmt.setString("v_email", email);
-            stmt.setBytes("v_pass", HashHelper.scrypt(pass).getBytes());
-            stmt.setBlob("v_pfp", (pfp == null ? null : pfp.getInputStream()));
+            stmt.setString(1, name);
+            stmt.setString(2, surname);
+            stmt.setBlob(3, (pfp == null ? null : pfp.getInputStream()));
+            stmt.setString(4, email);
+            stmt.setBytes(5, HashHelper.scrypt(pass).getBytes());
+            stmt.registerOutParameter(6, Types.CHAR);
             stmt.execute();
-            return stmt.getString("v_code");
+            return stmt.getString(6);
         }
     }
     public SCVerify verifyUserMail(String code, Timestamp ts) throws SQLException
     {
         try (CallableStatement stmt = con.prepareCall("{CALL VERIFY_USER(?, ?, ?)}"))
         {
-            stmt.registerOutParameter("v_sc", Types.TINYINT);
-            stmt.setString("v_code", code);
-            stmt.setTimestamp("v_now", ts);
+            stmt.setString(1, code);
+            stmt.setTimestamp(2, ts);
+            stmt.registerOutParameter(3, Types.TINYINT);
             stmt.execute();
-            return SCVerify.fromSC(stmt.getInt("v_sc"));
+            return SCVerify.fromSC(stmt.getInt(3));
         }
     }
     public SCVerify verifyUserMail(String code) throws SQLException
