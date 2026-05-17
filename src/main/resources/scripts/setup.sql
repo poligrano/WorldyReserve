@@ -4,7 +4,7 @@ USE db12636;
 
 CREATE TABLE users_pass (
     id BIGINT UNSIGNED AUTO_INCREMENT,
-    pass BINARY(16) NOT NULL,
+    pass BINARY(57) NOT NULL,
     PRIMARY KEY (id)
 );
 

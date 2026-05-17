@@ -46,7 +46,7 @@ public class DBConnection implements AutoCloseable
             stmt.setString(2, surname);
             stmt.setBlob(3, (pfp == null ? null : pfp.getInputStream()));
             stmt.setString(4, email);
-            stmt.setBytes(5, HashHelper.scrypt(pass).getBytes());
+            stmt.setBytes(5, HashHelper.scrypt(pass).getResultAsBytes());
             stmt.registerOutParameter(6, Types.CHAR);
             stmt.execute();
             return stmt.getString(6);
