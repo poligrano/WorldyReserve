@@ -99,6 +99,7 @@ BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
+            RESIGNAL;
         END;
     START TRANSACTION;
     INSERT INTO users_pass(pass)
@@ -122,6 +123,7 @@ BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
+            RESIGNAL;
         END;
     START TRANSACTION;
     INSERT INTO users_email(email)
@@ -154,6 +156,7 @@ BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
+            RESIGNAL;
         END;
     START TRANSACTION;
     SET v_byte_code = UNHEX(v_code);
