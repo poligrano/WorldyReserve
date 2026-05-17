@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.sql.*;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,9 +56,46 @@ public class DBConnection implements AutoCloseable
             return stmt.getString("v_code");
         }
     }
+    public SCVerify verifyUserMail(String code, Timestamp ts) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL VERIFY_USER(?, ?, ?)}"))
+        {
+            stmt.registerOutParameter("v_sc", Types.TINYINT);
+            stmt.setString("v_code", code);
+            stmt.setTimestamp("v_now", ts);
+            stmt.execute();
+            return SCVerify.fromSC(stmt.getInt("v_sc"));
+        }
+    }
+    public SCVerify verifyUserMail(String code) throws SQLException
+    {
+        return verifyUserMail(code, Timestamp.from(Instant.now()));
+    }
     @Override
     public void close() throws SQLException
     {
         con.close();
+    }
+    public enum SCVerify
+    {
+        Found(1),
+        NotFound(0),
+        FoundButExpired(-1);
+        private final int code;
+        private SCVerify(int code)
+        {
+            this.code = code;
+        }
+        public int getCode()
+        {
+            return code;
+        }
+        public static SCVerify fromSC(int code)
+        {
+            for (SCVerify sc : values())
+                if (sc.code == code)
+                    return sc;
+            throw new IllegalArgumentException("Invalid code passed");
+        }
     }
 }
