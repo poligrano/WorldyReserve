@@ -51,4 +51,12 @@ public class ServletHelper
             request.getSession().invalidate();
         request.getRequestDispatcher(ERROR_PAGE_FOLDER + "/" + errorContext + "Error.jsp").forward(request, response);
     }
+    public static void redirectCustomPage(HttpServletRequest request, HttpServletResponse response, int statusCode, String title, String subtitle, String mx) throws ServletException, IOException
+    {
+        response.setStatus(statusCode);
+        request.setAttribute("title", title);
+        request.setAttribute("subtitle", subtitle);
+        request.setAttribute("mx", mx);
+        request.getRequestDispatcher("custom_page.jsp").forward(request, response);
+    }
 }
