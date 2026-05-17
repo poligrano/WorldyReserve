@@ -48,13 +48,25 @@ CREATE UNIQUE INDEX confirm_code ON users_verify(code);
 
 CREATE EVENT purge_non_verified
 ON SCHEDULE EVERY 10 MINUTE
-DO  DELETE FROM  users
+DO
+BEGIN
+    DECLARE v_now TIMESTAMP DEFAULT NOW();
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+        END;
+    START TRANSACTION;
+    DELETE FROM  users
     WHERE   id IN
     (
         SELECT  uv.id
         FROM    users_verify AS uv
-        WHERE   uv.expiration < NOW()
+        WHERE   uv.expiration < v_now
     );
+    DELETE FROM users_verify
+    WHERE   expiration < v_now;
+    COMMIT;
+END;
 
 CREATE TABLE users_poi (
     user_id BIGINT UNSIGNED,
