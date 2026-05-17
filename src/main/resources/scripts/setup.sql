@@ -91,11 +91,11 @@ CREATE TABLE users_reserve_poi (
         ON UPDATE RESTRICT
 );
 
-CREATE PROCEDURE INSERT_NORMAL_USER(v_name VARCHAR(30), v_surname VARCHAR(30), v_pfp BLOB, v_email VARCHAR(254), v_pass BINARY(16), OUT v_code CHAR(32))
+CREATE PROCEDURE INSERT_NORMAL_USER(v_name TYPE OF users.name, v_surname TYPE OF users.surname, v_pfp TYPE OF users.pfp, v_email TYPE OF users_email.email, v_pass TYPE OF users_pass.pass, OUT v_code CHAR(32))
 BEGIN
-    DECLARE v_pass_id BIGINT UNSIGNED;
-    DECLARE v_email_id BIGINT UNSIGNED;
-    DECLARE v_user_id BIGINT UNSIGNED;
+    DECLARE v_pass_id TYPE OF users_pass.id;
+    DECLARE v_email_id TYPE OF users_email.id;
+    DECLARE v_user_id TYPE OF users.id;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
@@ -116,9 +116,9 @@ BEGIN
     COMMIT;
 END;
 
-CREATE PROCEDURE INSERT_GOOGLE_USER(v_name VARCHAR(30), v_surname VARCHAR(30), v_pfp BLOB, v_email VARCHAR(254), v_gid BIGINT UNSIGNED)
+CREATE PROCEDURE INSERT_GOOGLE_USER(v_name TYPE OF users.name, v_surname TYPE OF users.surname, v_pfp TYPE OF users.pfp, v_email TYPE OF users_email.email, v_gid TYPE OF users.gid)
 BEGIN
-    DECLARE v_email_id BIGINT UNSIGNED;
+    DECLARE v_email_id TYPE OF users_email.id;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
@@ -132,7 +132,7 @@ BEGIN
     COMMIT;
 END;
 
-CREATE PROCEDURE GET_NORMAL_USER_INFO(v_email VARCHAR(254), OUT v_pass BINARY(16), OUT v_id BIGINT UNSIGNED)
+CREATE PROCEDURE GET_NORMAL_USER_INFO(v_email TYPE OF users_email.email, OUT v_pass TYPE OF users_pass.pass, OUT v_id TYPE OF users.id)
 BEGIN
     SELECT  v_id = u.id, v_pass = up.pass
     FROM    users AS u
