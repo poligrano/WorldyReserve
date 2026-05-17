@@ -40,7 +40,7 @@ public class DBConnection implements AutoCloseable
     }
     public String insertNormalUser(String name, String surname, String email, String pass, Part pfp) throws SQLException, IOException
     {
-        try (CallableStatement stmt = con.prepareCall("{CALL insert_user(?, ?, ?, ?, ?, ?)}"))
+        try (CallableStatement stmt = con.prepareCall("{CALL INSERT_NORMAL_USER(?, ?, ?, ?, ?, ?)}"))
         {
             stmt.registerOutParameter("v_code", Types.CHAR);
             stmt.setString("v_name", name);
