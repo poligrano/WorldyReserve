@@ -136,16 +136,27 @@ BEGIN
             );
 END;
 
-CREATE PROCEDURE VERIFY_USER(v_code BINARY(16), OUT v_is_verified BOOL)
+CREATE PROCEDURE VERIFY_USER(v_code CHAR(32), v_now TIMESTAMP, OUT v_sc TINYINT)
 BEGIN
+    DECLARE v_exp TIMESTAMP;
+    DECLARE v_byte_code BINARY(16);
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
         END;
     START TRANSACTION;
-    DELETE FROM users_verify
-    WHERE   code = v_code
-            AND expiration >= NOW();
-    v_is_verified = (ROW_COUNT() = 1);
+    SET v_byte_code = UNHEX(v_code);
+    SELECT  uv.expiration INTO v_exp
+    FROM    users_verify AS uv
+    WHERE   uv.code = v_byte_code;
+    IF v_exp IS NULL THEN
+        SET v_sc = 0;
+    ELSEIF v_exp < v_now THEN
+        v_sc = -1;
+    ELSE
+        DELETE FROM users_verify
+        WHERE   code = v_byte_code;
+        v_sc = ROW_COUNT();
+    END IF;
     COMMIT;
 END;
