@@ -136,7 +136,7 @@ END;
 
 CREATE PROCEDURE GET_NORMAL_USER_INFO(v_email TYPE OF users_email.email, OUT v_pass TYPE OF users_pass.pass, OUT v_id TYPE OF users.id)
 BEGIN
-    SELECT  v_id = u.id, v_pass = up.pass
+    SELECT  u.id, up.pass INTO v_id, v_pass
     FROM    users AS u
             INNER JOIN users_pass AS up ON u.pass = up.id
             INNER JOIN users_email AS ue ON u.email = ue.id
