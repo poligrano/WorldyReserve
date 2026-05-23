@@ -5,6 +5,7 @@ import edu.fauser.tpsit.progettotpsit.singleton.EnvVar;
 
 import javax.servlet.http.Part;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.time.Instant;
 import java.util.Optional;
@@ -66,6 +67,34 @@ public class DBConnection implements AutoCloseable
     public SCVerify verifyUserMail(String code) throws SQLException
     {
         return verifyUserMail(code, Timestamp.from(Instant.now()));
+    }
+    public String setChangePassword(String email) throws NoSuchAlgorithmException, SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL SET_CHANGE_PASS_CODE(?, ?)}"))
+        {
+            String code = HashHelper.generateCode(8);
+            stmt.setString(1, email);
+            stmt.setString(2, code);
+            stmt.execute();
+            return code;
+        }
+    }
+    public SCVerify changePassword(String email, String code, String pass, Timestamp ts) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL CHANGE_PASS(?, ?, ?, ?, ?)}"))
+        {
+            stmt.setString(1, email);
+            stmt.setTimestamp(2, ts);
+            stmt.setString(3, code);
+            stmt.setBytes(4, HashHelper.scrypt(pass).getResultAsBytes());
+            stmt.registerOutParameter(5, Types.TINYINT);
+            stmt.execute();
+            return SCVerify.fromSC(stmt.getInt(5));
+        }
+    }
+    public SCVerify changePassword(String email, String code, String pass) throws SQLException
+    {
+        return changePassword(email, code, pass, Timestamp.from(Instant.now()));
     }
     @Override
     public void close() throws SQLException

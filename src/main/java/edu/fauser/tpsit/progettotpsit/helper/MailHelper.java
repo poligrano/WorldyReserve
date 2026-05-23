@@ -9,7 +9,6 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
@@ -51,9 +50,9 @@ public class MailHelper
         mx.setContent(body, "text/html");
         return mx;
     }
-    public static void sendMail(String recpipients, String subject, String body) throws MessagingException, UnsupportedEncodingException
+    public static void sendMail(String recipients, String subject, String body) throws MessagingException, UnsupportedEncodingException
     {
-        Transport.send(getMessage(recpipients, subject, body));
+        Transport.send(getMessage(recipients, subject, body));
     }
     public static void sendMail(String recipients, String subject, HttpServletRequest request, HttpServletResponse response, String jspPath) throws ServletException, IOException, MessagingException
     {

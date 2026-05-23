@@ -67,6 +67,22 @@ BEGIN
     COMMIT;
 END;
 
+CREATE TABLE users_pass_change (
+    id BIGINT UNSIGNED,
+    code CHAR(8) NOT NULL,
+    expiration TIMESTAMP DEFAULT (NOW() + INTERVAL 5 MINUTE),
+    PRIMARY KEY (id),
+    FOREIGN KEY (id) REFERENCES users_pass(id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT
+);
+
+CREATE EVENT purge_unused_code
+    ON SCHEDULE EVERY 1 DAY
+    DO
+    DELETE FROM users_pass_change
+    WHERE   expiration < NOW();
+
 CREATE TABLE users_poi (
     user_id BIGINT UNSIGNED,
     osm_id BIGINT UNSIGNED,
@@ -172,7 +188,64 @@ BEGIN
             BEGIN
             DELETE FROM users_verify
             WHERE   code = v_byte_code;
-            SET v_sc = ROW_COUNT();
+            SET v_sc = 1;
+            END;
+    END CASE;
+    COMMIT;
+END;
+
+CREATE PROCEDURE SET_CHANGE_PASS_CODE(v_email TYPE OF users_email.email, v_code TYPE OF users_pass_change.code)
+BEGIN
+    DECLARE v_upid TYPE OF users_pass.id;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+            RESIGNAL;
+        END;
+    START TRANSACTION;
+    SELECT  up.id INTO v_upid
+    FROM    users AS u
+            INNER JOIN users_email AS ue ON u.email = ue.id
+            INNER JOIN users_pass up ON u.pass = up.id
+    WHERE   ue.email = v_email;
+    INSERT INTO users_pass_change(id, code)
+    VALUES  (v_upid, v_code)
+    ON DUPLICATE KEY UPDATE code = v_code, expiration = (NOW() + INTERVAL 5 MINUTE);
+    COMMIT;
+END;
+
+CREATE PROCEDURE CHANGE_PASS(v_email TYPE OF users_email.email, v_now TIMESTAMP, v_code TYPE OF users_pass_change.code, v_pass TYPE OF users_pass.pass, OUT v_sc TINYINT)
+BEGIN
+    DECLARE v_upid TYPE OF users_pass.id;
+    DECLARE v_exp TIMESTAMP;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+            RESIGNAL;
+        END;
+    START TRANSACTION;
+    SELECT  up.id INTO v_upid
+    FROM    users AS u
+            INNER JOIN users_email AS ue ON u.email = ue.id
+            INNER JOIN users_pass up ON u.pass = up.id
+    WHERE   ue.email = v_email;
+    SELECT  upc.expiration INTO v_exp
+    FROM    users_pass_change AS upc
+    WHERE   upc.id = v_upid
+            AND upc.code = v_code;
+    CASE
+        WHEN v_exp IS NULL THEN
+            SET v_sc = 0;
+        WHEN v_exp < v_now THEN
+            SET v_sc = -1;
+        ELSE
+            BEGIN
+                DELETE FROM users_pass_change
+                WHERE   id = v_upid;
+                UPDATE  users_pass
+                SET pass = v_pass
+                WHERE   id = v_upid;
+                SET v_sc = 1;
             END;
     END CASE;
     COMMIT;

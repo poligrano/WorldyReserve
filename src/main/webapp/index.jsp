@@ -18,10 +18,11 @@
             Password:
             <input type="password" name="pass" required />
         </label>
+        <a href="change_password.jsp">Password dimenticata?</a>
         <br />
         <input type="submit" value="Accedi" />
         <br />
     </form>
-    <p>Non hai ancora un profilo? <a href="signin.jsp">registrati</a></p>
+    <p>Non hai ancora un profilo? <a href="signin.jsp">Registrati</a></p>
 </body>
 </html>
