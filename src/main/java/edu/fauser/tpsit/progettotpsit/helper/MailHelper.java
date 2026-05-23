@@ -20,7 +20,13 @@ public class MailHelper
     private static final String SSL_PROTOCOL = "TLSv1.2";
     private static final String SENDER_ADDR = EnvVar.getInstance().getEnv().get("EMAIL");
     private static final String SENDER_PSW = EnvVar.getInstance().getEnv().get("EMAIL_PSW");
-    private static final Session sess = getSession();
+    private static final Session sess = Session.getInstance(getProperties(), new Authenticator() {
+        @Override
+        protected PasswordAuthentication getPasswordAuthentication()
+        {
+            return new PasswordAuthentication(SENDER_ADDR, SENDER_PSW);
+        }
+    });
     private static Properties getProperties()
     {
         Properties prop = new Properties();
@@ -30,16 +36,6 @@ public class MailHelper
         prop.put("mail.smtp.port", String.valueOf(PORT));
         prop.put("mail.smtp.ssl.protocols", SSL_PROTOCOL);
         return prop;
-    }
-    private static Session getSession()
-    {
-        return Session.getInstance(getProperties(), new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication()
-            {
-                return new PasswordAuthentication(SENDER_ADDR, SENDER_PSW);
-            }
-        });
     }
     private static Message getMessage(String recipients, String subject, String body) throws UnsupportedEncodingException, MessagingException
     {
