@@ -45,7 +45,10 @@ public class DBConnection implements AutoCloseable
         {
             stmt.setString(1, name);
             stmt.setString(2, surname);
-            stmt.setBlob(3, (pfp == null ? null : pfp.getInputStream()));
+            if (pfp.getSize() == 0)
+                stmt.setNull(3, Types.BLOB);
+            else
+                stmt.setBlob(3, pfp.getInputStream());
             stmt.setString(4, email);
             stmt.setBytes(5, HashHelper.scrypt(pass).getResultAsBytes());
             stmt.registerOutParameter(6, Types.CHAR);
@@ -95,6 +98,16 @@ public class DBConnection implements AutoCloseable
     public SCVerify changePassword(String email, String code, String pass) throws SQLException
     {
         return changePassword(email, code, pass, Timestamp.from(Instant.now()));
+    }
+    public Blob getUserPfp(Long uid) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL GET_USER_PFP(?, ?)}"))
+        {
+            stmt.setLong(1, uid);
+            stmt.registerOutParameter(2, Types.BLOB);
+            stmt.execute();
+            return stmt.getBlob(2);
+        }
     }
     @Override
     public void close() throws SQLException

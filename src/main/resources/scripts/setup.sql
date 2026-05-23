@@ -250,3 +250,10 @@ BEGIN
     END CASE;
     COMMIT;
 END;
+
+CREATE PROCEDURE GET_USER_PFP(v_id TYPE OF users.id, OUT v_pfp TYPE OF users.pfp)
+BEGIN
+    SELECT  u.pfp INTO v_pfp
+    FROM    users AS u
+    WHERE   u.id = v_id;
+END;
