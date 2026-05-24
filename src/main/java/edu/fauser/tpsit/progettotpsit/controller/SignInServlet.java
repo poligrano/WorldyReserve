@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
-@MultipartConfig
+@MultipartConfig(maxFileSize = DBConnection.MAX_PFP_SIZE)
 @WebServlet(name = "SignInServlet", value = "/signin")
 public class SignInServlet extends HttpServlet
 {

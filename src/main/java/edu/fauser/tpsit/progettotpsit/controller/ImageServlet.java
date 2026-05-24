@@ -50,7 +50,7 @@ public class ImageServlet extends HttpServlet
         {
             byte[] pfp = is.readAllBytes();
             response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("image/jpeg");
+            response.setContentType("image/*");
             response.setContentLength(pfp.length);
             response.getOutputStream().write(pfp);
             response.flushBuffer();

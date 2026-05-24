@@ -5,6 +5,7 @@ import edu.fauser.tpsit.progettotpsit.singleton.EnvVar;
 
 import javax.servlet.http.Part;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.time.Instant;
@@ -12,12 +13,13 @@ import java.util.Optional;
 
 public class DBConnection implements AutoCloseable
 {
-    private static final String DBURL = "jdbc:mysql://" + EnvVar.getInstance().getEnv().get("DB_HOST", "localhost") + ":3306/db12636";
+    public static final int MAX_PFP_SIZE = 65535;
+    private static final String DBURL = "jdbc:mysql://" + EnvVar.instance().getEnv().get("DB_HOST", "localhost") + ":3306/db12636";
     private final Connection con;
     public DBConnection() throws SQLException
     {
         DriverManager.registerDriver(new com.mysql.jdbc.Driver());
-        con = DriverManager.getConnection(DBURL, EnvVar.getInstance().getEnv().get("DB_ROOT"), EnvVar.getInstance().getEnv().get("DB_ROOT_PSW"));
+        con = DriverManager.getConnection(DBURL, EnvVar.instance().getEnv().get("DB_ROOT"), EnvVar.instance().getEnv().get("DB_ROOT_PSW"));
     }
     public Optional<Long> retrieveNormalUserID(String email, String pass) throws SQLException
     {
@@ -28,6 +30,16 @@ public class DBConnection implements AutoCloseable
             stmt.registerOutParameter(3, Types.BIGINT);
             stmt.execute();
             return (stmt.getLong(3) != 0 && HashHelper.checkHash(pass, stmt.getBytes(2)) ? Optional.of(stmt.getLong(3)) : Optional.empty());
+        }
+    }
+    public Optional<Long> retrieveGoogleUserID(String gid) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL GET_GOOGLE_USER_INFO(?, ?)}"))
+        {
+            stmt.setString(1, gid);
+            stmt.registerOutParameter(2, Types.BIGINT);
+            stmt.execute();
+            return (stmt.getLong(2) == 0 ? Optional.empty() : Optional.of(stmt.getLong(2)));
         }
     }
     public Optional<String> retrieveUserName(Long uid) throws SQLException
@@ -54,6 +66,20 @@ public class DBConnection implements AutoCloseable
             stmt.registerOutParameter(6, Types.CHAR);
             stmt.execute();
             return stmt.getString(6);
+        }
+    }
+    public long insertGoogleUser(String name, String surname, InputStream pfp, String email, String gid) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL INSERT_GOOGLE_USER(?, ?, ?, ?, ?, ?)}"))
+        {
+            stmt.setString(1, name);
+            stmt.setString(2, surname);
+            stmt.setBlob(3, pfp);
+            stmt.setString(4, email);
+            stmt.setString(5, gid);
+            stmt.registerOutParameter(6, Types.BIGINT);
+            stmt.execute();
+            return stmt.getLong(6);
         }
     }
     public SCVerify verifyUserMail(String code, Timestamp ts) throws SQLException

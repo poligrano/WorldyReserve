@@ -12,7 +12,7 @@ public class EnvVar
     {
         env = Dotenv.configure().directory(Objects.requireNonNull(getClass().getClassLoader().getResource("/env")).getPath()).load();
     }
-    public static EnvVar getInstance()
+    public static EnvVar instance()
     {
         return instance == null ? (instance = new EnvVar()) : instance;
     }

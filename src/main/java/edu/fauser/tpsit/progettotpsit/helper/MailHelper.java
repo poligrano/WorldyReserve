@@ -18,8 +18,8 @@ public class MailHelper
     private static final String HOST = "smtp.gmail.com";
     private static final int PORT = 587;
     private static final String SSL_PROTOCOL = "TLSv1.2";
-    private static final String SENDER_ADDR = EnvVar.getInstance().getEnv().get("EMAIL");
-    private static final String SENDER_PSW = EnvVar.getInstance().getEnv().get("EMAIL_PSW");
+    private static final String SENDER_ADDR = EnvVar.instance().getEnv().get("EMAIL");
+    private static final String SENDER_PSW = EnvVar.instance().getEnv().get("EMAIL_PSW");
     private static final Session sess = Session.getInstance(getProperties(), new Authenticator() {
         @Override
         protected PasswordAuthentication getPasswordAuthentication()
