@@ -50,7 +50,7 @@ public class ChangePasswordServlet extends HttpServlet
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     {
-        ServletHelper.checkSession(request, response, "uid", this::changePass, this::manageExistingSession);
+        ServletHelper.checkSession(request, response, "uid", this::changePass, ServletHelper::defaultManageExistingSession);
     }
     private void changePass(HttpServletRequest request, HttpServletResponse response)
     {
@@ -78,17 +78,6 @@ public class ChangePasswordServlet extends HttpServlet
                 break;
             case FoundButExpired:
                 ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Codice scaduto", "change_password", true);
-        }
-    }
-    private void manageExistingSession(HttpServletRequest request, HttpServletResponse response)
-    {
-        try
-        {
-            response.sendRedirect("load");
-        }
-        catch (IOException e)
-        {
-            log(e.getMessage(), e);
         }
     }
     private void sendCode(HttpServletRequest request, HttpServletResponse response)

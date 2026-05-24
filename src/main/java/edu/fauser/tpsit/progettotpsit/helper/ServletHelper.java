@@ -59,4 +59,15 @@ public class ServletHelper
         request.setAttribute("mx", mx);
         request.getRequestDispatcher("custom_page.jsp").forward(request, response);
     }
+    public static void defaultManageExistingSession(HttpServletRequest request, HttpServletResponse response)
+    {
+        try
+        {
+            response.sendRedirect("/load");
+        }
+        catch (IOException e)
+        {
+            request.getServletContext().log(e.getMessage(), e);
+        }
+    }
 }

@@ -44,18 +44,7 @@ public class SignInServlet extends HttpServlet
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     {
-        ServletHelper.checkSession(request, response, "uid", this::manageNewSession, this::manageExistingSession);
-    }
-    private void manageExistingSession(HttpServletRequest request, HttpServletResponse response)
-    {
-        try
-        {
-            response.sendRedirect("load");
-        }
-        catch (IOException e)
-        {
-            log(e.getMessage(), e);
-        }
+        ServletHelper.checkSession(request, response, "uid", this::manageNewSession, ServletHelper::defaultManageExistingSession);
     }
     private void manageNewSession(HttpServletRequest request, HttpServletResponse response)
     {
@@ -86,7 +75,7 @@ public class SignInServlet extends HttpServlet
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     {
-        ServletHelper.checkSession(request, response, "uid", this::verifyUser, this::manageExistingSession);
+        ServletHelper.checkSession(request, response, "uid", this::verifyUser, ServletHelper::defaultManageExistingSession);
     }
     private void verifyUser(HttpServletRequest request, HttpServletResponse response)
     {
