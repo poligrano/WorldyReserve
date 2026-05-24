@@ -16,7 +16,7 @@ CREATE TABLE users_email (
 
 CREATE TABLE users (
     id BIGINT UNSIGNED AUTO_INCREMENT,
-    gid BIGINT UNSIGNED,
+    gid VARCHAR(255) COLLATE utf8mb4_bin,
     name VARCHAR(30) NOT NULL,
     surname VARCHAR(30) NOT NULL,
     pfp BLOB,
@@ -133,7 +133,7 @@ BEGIN
     COMMIT;
 END;
 
-CREATE PROCEDURE INSERT_GOOGLE_USER(v_name TYPE OF users.name, v_surname TYPE OF users.surname, v_pfp TYPE OF users.pfp, v_email TYPE OF users_email.email, v_gid TYPE OF users.gid)
+CREATE PROCEDURE INSERT_GOOGLE_USER(v_name TYPE OF users.name, v_surname TYPE OF users.surname, v_pfp TYPE OF users.pfp, v_email TYPE OF users_email.email, v_gid TYPE OF users.gid, OUT v_id TYPE OF users.id)
 BEGIN
     DECLARE v_email_id TYPE OF users_email.id;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -147,6 +147,7 @@ BEGIN
     SET v_email_id = LAST_INSERT_ID();
     INSERT INTO users(name, surname, pfp, email, gid)
     VALUES (v_name, v_surname, v_pfp, v_email_id, v_gid);
+    SET v_id = LAST_INSERT_ID();
     COMMIT;
 END;
 
@@ -163,6 +164,13 @@ BEGIN
                 SELECT  uv.id
                 FROM    users_verify AS uv
             );
+END;
+
+CREATE PROCEDURE GET_GOOGLE_USER_INFO(v_gid TYPE OF users.gid, OUT v_id TYPE OF users.id)
+BEGIN
+    SELECT  u.id INTO v_id
+    FROM    users AS u
+    WHERE   u.gid = v_gid;
 END;
 
 CREATE PROCEDURE VERIFY_USER(v_code CHAR(32), v_now TIMESTAMP, OUT v_sc TINYINT)
