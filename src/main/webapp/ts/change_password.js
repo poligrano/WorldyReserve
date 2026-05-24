@@ -34,12 +34,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-function sendCodeEvent(URI) {
+var emailElement = document.getElementById("email");
+var sendButtonElement = document.getElementById("send");
+var timerElement = document.getElementById("timer");
+function sendCodeEvent(URI, delay) {
     return __awaiter(this, void 0, void 0, function () {
         var resp, _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
-                case 0: return [4 /*yield*/, fetch(URI + "?email=" + document.getElementById("email").value)];
+                case 0: return [4 /*yield*/, fetch(URI + "?email=" + emailElement.value)];
                 case 1:
                     resp = _b.sent();
                     _a = alert;
@@ -47,20 +50,19 @@ function sendCodeEvent(URI) {
                 case 2:
                     _a.apply(void 0, [_b.sent()]);
                     if (resp.ok)
-                        timeoutSend();
+                        timeoutSend(delay);
                     return [2 /*return*/];
             }
         });
     });
 }
-function timeoutSend() {
-    var delay = 30;
-    document.getElementById("send").disabled = true;
+function timeoutSend(delay) {
+    sendButtonElement.disabled = true;
     var timer = setInterval(function () {
         delay--;
-        document.getElementById("timer").innerHTML = "00:" + (delay.toString().length === 1 ? "0" : "") + delay;
+        timerElement.innerHTML = "00:" + (delay.toString().length === 1 ? "0" : "") + delay;
         if (delay === 0) {
-            document.getElementById("send").disabled = false;
+            sendButtonElement.disabled = false;
             clearInterval(timer);
         }
     }, 1000);

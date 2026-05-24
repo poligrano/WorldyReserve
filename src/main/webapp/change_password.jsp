@@ -6,7 +6,7 @@
 <html>
 <head>
     <title>Proggetto TPSIT - Recupera</title>
-    <script src="ts/change_password.js"></script>
+    <script src="ts/change_password.js" defer></script>
 </head>
 <body>
     <form action="change" method="post">

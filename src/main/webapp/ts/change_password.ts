@@ -1,6 +1,10 @@
+const emailElement: HTMLInputElement = document.getElementById("email") as HTMLInputElement;
+const sendButtonElement: HTMLInputElement = document.getElementById("send") as HTMLInputElement;
+const timerElement: HTMLElement = document.getElementById("timer");
+
 async function sendCodeEvent(URI: string, delay: number): Promise<void>
 {
-    let resp: Response = await fetch(URI + "?email=" + (document.getElementById("email") as HTMLInputElement).value);
+    let resp: Response = await fetch(URI + "?email=" + emailElement.value);
     alert(await resp.text());
     if (resp.ok)
         timeoutSend(delay);
@@ -8,13 +12,13 @@ async function sendCodeEvent(URI: string, delay: number): Promise<void>
 
 function timeoutSend(delay: number): void
 {
-    (document.getElementById("send") as HTMLInputElement).disabled = true;
+    sendButtonElement.disabled = true;
     const timer = setInterval(() => {
         delay--;
-        document.getElementById("timer").innerHTML = "00:" + (delay.toString().length === 1 ? "0" : "") + delay;
+        timerElement.innerHTML = "00:" + (delay.toString().length === 1 ? "0" : "") + delay;
         if (delay === 0)
         {
-            (document.getElementById("send") as HTMLInputElement).disabled = false;
+            sendButtonElement.disabled = false;
             clearInterval(timer);
         }
     }, 1000);
