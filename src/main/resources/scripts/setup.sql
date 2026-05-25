@@ -225,7 +225,12 @@ BEGIN
     FROM    users AS u
             INNER JOIN users_email AS ue ON u.email = ue.id
             INNER JOIN users_pass up ON u.pass = up.id
-    WHERE   ue.email = v_email;
+    WHERE   ue.email = v_email
+            AND u.id NOT IN
+                (
+                    SELECT  uv.id
+                    FROM    users_verify AS uv
+                );
     INSERT INTO users_pass_change(id, code)
     VALUES  (v_upid, v_code)
     ON DUPLICATE KEY UPDATE code = v_code, expiration = (NOW() + INTERVAL 5 MINUTE);
@@ -273,5 +278,10 @@ CREATE PROCEDURE GET_USER_PFP(v_id TYPE OF users.id, OUT v_pfp TYPE OF users.pfp
 BEGIN
     SELECT  u.pfp INTO v_pfp
     FROM    users AS u
-    WHERE   u.id = v_id;
+    WHERE   u.id = v_id
+            AND u.id NOT IN
+              (
+                  SELECT  uv.id
+                  FROM    users_verify AS uv
+              );
 END;
