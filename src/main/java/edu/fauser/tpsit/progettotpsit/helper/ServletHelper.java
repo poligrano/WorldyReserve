@@ -12,7 +12,7 @@ public class ServletHelper
     public static boolean checkParams(HttpServletRequest request, HttpServletResponse response, BiConsumer<HttpServletRequest, HttpServletResponse> onInvalid, BiConsumer<HttpServletRequest, HttpServletResponse> onValid, String... params)
     {
         for (String p : params)
-            if (request.getParameter(p) == null)
+            if (request.getParameter(p) == null || request.getParameter(p).isBlank())
             {
                 if (onInvalid != null)
                     onInvalid.accept(request, response);
