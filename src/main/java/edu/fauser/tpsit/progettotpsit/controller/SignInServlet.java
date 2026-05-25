@@ -57,7 +57,7 @@ public class SignInServlet extends HttpServlet
                     request.setAttribute("verify_URL", request.getRequestURL().toString());
                     request.setAttribute("code", con.insertNormalUser(request.getParameter("name"), request.getParameter("surname"), request.getParameter("email"), request.getParameter("pass"), request.getPart("pfp")));
                     MailHelper.sendMail(request.getParameter("email"), "Verifica indirizzo email", request, response, "WEB-INF/email/verify.jsp");
-                    ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_CREATED, "Verifica", "Ci sei quasi...", "Completa la verifica del tuo indirizzo e-mail tramite il link inviato");
+                    ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_CREATED, "Verifica", "Ci sei quasi...", "Completa la verifica del tuo indirizzo email tramite il link inviato");
                 }
                 else
                     ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Completa tutti i campi", "signin", true);
@@ -96,7 +96,7 @@ public class SignInServlet extends HttpServlet
         switch (sc)
         {
             case Found:
-                ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_OK, "Verifica", "Verifica completata", "La tua mail è stata verificata correttamente, ora puoi tornare alla pagina di login");
+                ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_OK, "Verifica", "Verifica completata", "La tua email è stata verificata correttamente, ora puoi tornare alla pagina di login");
                 break;
             case NotFound:
                 ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_NOT_FOUND, "Verifica", "Verifica non riuscita", "Codice inviato invalido o inesistente");

@@ -124,6 +124,57 @@ body::after {
     opacity: 0.6;
 }
 
+.form-group button {
+    display: inline-block;
+    width: 30%;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: transparent;
+    border: 0.02rem solid var(--accent);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.70rem;
+    font-weight: 500;
+    color: var(--accent);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    letter-spacing: 0.02em;
+}
+
+.form-group button:hover {
+    background: rgba(200, 121, 65, 0.1);
+    border-color: var(--accent-h);
+    color: var(--accent-h);
+    box-shadow: 0 4px 24px rgba(200, 121, 65, 0.15);
+}
+
+.form-group button:active {
+    transform: scale(0.98);
+    background: rgba(200, 121, 65, 0.15);
+}
+
+.form-group button:disabled {
+    cursor: not-allowed;
+}
+
+.form-group button:disabled:active,
+.form-group button:disabled:hover {
+    transform: none;
+    background: transparent;
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: none;
+}
+
+.form-group p {
+    display: inline-block;
+    margin-left: 0.7rem;
+    font-family: inherit;
+    font-size: 1rem;
+    letter-spacing: 0.02rem;
+    color: var(--muted);
+}
+
 .error-group {
     margin-left: 0.02rem;
     margin-right: 0.02rem;

@@ -48,9 +48,6 @@
         <div class="form-group">
             <label for="pass">Password</label>
             <input id="pass" type="password" name="pass" placeholder="••••••••" required />
-            <div class="forgot">
-                <a href="change_password.jsp">Password dimenticata?</a>
-            </div>
         </div>
         <button type="submit" class="btn-primary">Registrati</button>
     </form>
