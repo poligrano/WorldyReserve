@@ -49,6 +49,11 @@ CREATE EVENT purge_non_verified
 ON SCHEDULE EVERY 10 MINUTE
 DO
 BEGIN
+    CALL purge_non_verified();
+END;
+
+CREATE PROCEDURE purge_non_verified()
+BEGIN
     DECLARE v_now TIMESTAMP DEFAULT NOW();
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -57,11 +62,11 @@ BEGIN
     START TRANSACTION;
     DELETE FROM  users
     WHERE   id IN
-    (
-        SELECT  uv.id
-        FROM    users_verify AS uv
-        WHERE   uv.expiration < v_now
-    );
+            (
+                SELECT  uv.id
+                FROM    users_verify AS uv
+                WHERE   uv.expiration < v_now
+            );
     DELETE FROM users_verify
     WHERE   expiration < v_now;
     COMMIT;
@@ -80,8 +85,13 @@ CREATE TABLE users_pass_change (
 CREATE EVENT purge_unused_code
     ON SCHEDULE EVERY 1 DAY
     DO
+    CALL purge_unused_code();
+
+CREATE PROCEDURE purge_unused_code()
+BEGIN
     DELETE FROM users_pass_change
     WHERE   expiration < NOW();
+END;
 
 CREATE TABLE users_poi (
     user_id BIGINT UNSIGNED,
