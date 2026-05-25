@@ -203,6 +203,13 @@ body::after {
     font-size: 0.8rem;
 }
 
+.full-divider {
+    display: flex;
+    margin: 1.5rem 0;
+}
+
+.full-divider::before,
+.full-divider::after,
 .divider::before,
 .divider::after {
     content: '';
