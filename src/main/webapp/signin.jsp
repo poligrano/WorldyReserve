@@ -9,7 +9,7 @@
 <html lang="it">
 <head>
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>ProgettoTPSIT – Signin</title>
+    <title>ProgettoTPSIT – Registrati</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="ts/generic_error.js" defer></script>
     <script src="ts/singin.js" defer></script>
