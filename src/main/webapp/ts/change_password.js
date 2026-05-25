@@ -45,7 +45,7 @@ function sendCodeEvent(URI, delay) {
                 case 0: return [4 /*yield*/, fetch(URI + "?email=" + emailElement.value)];
                 case 1:
                     resp = _b.sent();
-                    _a = alert;
+                    _a = init_error;
                     return [4 /*yield*/, resp.text()];
                 case 2:
                     _a.apply(void 0, [_b.sent()]);
@@ -58,10 +58,12 @@ function sendCodeEvent(URI, delay) {
 }
 function timeoutSend(delay) {
     sendButtonElement.disabled = true;
+    timerElement.innerHTML = "00:" + (delay.toString().length === 1 ? "0" : "") + delay;
     var timer = setInterval(function () {
         delay--;
         timerElement.innerHTML = "00:" + (delay.toString().length === 1 ? "0" : "") + delay;
         if (delay === 0) {
+            timerElement.innerHTML = "";
             sendButtonElement.disabled = false;
             clearInterval(timer);
         }

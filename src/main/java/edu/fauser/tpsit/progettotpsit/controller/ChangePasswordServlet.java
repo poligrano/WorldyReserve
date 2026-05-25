@@ -84,14 +84,21 @@ public class ChangePasswordServlet extends HttpServlet
     {
         try
         {
-            if (ServletHelper.checkParams(request, "email") && !request.getParameter("email").isBlank())
+            try
             {
-                request.setAttribute("code", con.setChangePassword(request.getParameter("email")));
-                MailHelper.sendMail(request.getParameter("email"), "Codice cambio password", request, response, "WEB-INF/email/change_code.jsp");
-                restRespond(response, HttpServletResponse.SC_OK, "Codice inviato!");
+                if (ServletHelper.checkParams(request, "email") && !request.getParameter("email").isBlank())
+                {
+                    request.setAttribute("code", con.setChangePassword(request.getParameter("email")));
+                    MailHelper.sendMail(request.getParameter("email"), "Codice cambio password", request, response, "WEB-INF/email/change_code.jsp");
+                    restRespond(response, HttpServletResponse.SC_OK, "Codice inviato!");
+                }
+                else
+                    restRespond(response, HttpServletResponse.SC_BAD_REQUEST, "Completa il campo email");
             }
-            else
-                restRespond(response, HttpServletResponse.SC_BAD_REQUEST, "Parametro \"email\" mancante!");
+            catch (SQLIntegrityConstraintViolationException e)
+            {
+                restRespond(response, HttpServletResponse.SC_NOT_FOUND, "Utente non trovato");
+            }
         }
         catch (SendFailedException e)
         {

@@ -5,7 +5,7 @@ const timerElement: HTMLElement = document.getElementById("timer");
 async function sendCodeEvent(URI: string, delay: number): Promise<void>
 {
     let resp: Response = await fetch(URI + "?email=" + emailElement.value);
-    alert(await resp.text());
+    init_error(await resp.text());
     if (resp.ok)
         timeoutSend(delay);
 }
@@ -13,11 +13,13 @@ async function sendCodeEvent(URI: string, delay: number): Promise<void>
 function timeoutSend(delay: number): void
 {
     sendButtonElement.disabled = true;
+    timerElement.innerHTML = "00:" + (delay.toString().length === 1 ? "0" : "") + delay;
     const timer = setInterval(() => {
         delay--;
         timerElement.innerHTML = "00:" + (delay.toString().length === 1 ? "0" : "") + delay;
         if (delay === 0)
         {
+            timerElement.innerHTML = "";
             sendButtonElement.disabled = false;
             clearInterval(timer);
         }
