@@ -57,7 +57,7 @@ public class SignInServlet extends HttpServlet
                     request.setAttribute("verify_URL", request.getRequestURL().toString());
                     request.setAttribute("code", con.insertNormalUser(request.getParameter("name"), request.getParameter("surname"), request.getParameter("email"), request.getParameter("pass"), request.getPart("pfp")));
                     MailHelper.sendMail(request.getParameter("email"), "Verifica indirizzo email", request, response, "WEB-INF/email/verify.jsp");
-                    ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_CREATED, "Verifica", "Ci sei quasi...", "Completa la verifica del tuo indirizzo e-mail " + request.getParameter("email") + " tramite il link inviato");
+                    ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_CREATED, "Verifica", "Ci sei quasi...", "Completa la verifica del tuo indirizzo e-mail tramite il link inviato");
                 }
                 else
                     ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Completa tutti i campi", "signin", true);
