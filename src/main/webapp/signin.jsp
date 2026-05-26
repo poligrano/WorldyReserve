@@ -11,8 +11,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>ProgettoTPSIT – Registrati</title>
     <link rel="stylesheet" href="css/style.css" />
-    <script src="ts/generic_error.js" defer></script>
-    <script src="ts/singin.js" defer></script>
 </head>
 <body>
 <div class="card">
@@ -31,7 +29,7 @@
     <form action="signin" method="post" enctype="multipart/form-data">
         <div class="form-group">
             <label for="pfp">Foto Profilo</label>
-            <input id="pfp" type="file" name="pfp" accept="image/jpeg, image/png" onchange="pfpOnChange(${DBConnection.MAX_PFP_SIZE})" />
+            <input id="pfp" type="file" name="pfp" accept="image/jpeg, image/png" onchange="Utils.pfpOnChange(${DBConnection.MAX_PFP_SIZE})" />
         </div>
         <div class="form-group">
             <label for="name">Nome</label>
@@ -61,3 +59,4 @@
 </div>
 </body>
 </html>
+<script src="ts/dist/Utils.js"></script>

@@ -9,8 +9,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>ProgettoTPSIT – Recupera password</title>
     <link rel="stylesheet" href="css/style.css" />
-    <script src="ts/generic_error.js" defer></script>
-    <script src="ts/change_password.js" defer></script>
 </head>
 <body>
 <div class="card">
@@ -30,7 +28,7 @@
         <div class="form-group">
             <label for="email">Indirizzo e-mail</label>
             <input id="email" type="email" name="email" placeholder="nome@esempio.com" required />
-            <button id="send" type="button" onclick="sendCodeEvent('${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}/ProgettoTPSIT_war_exploded/change', 30)">Manda codice</button>
+            <button id="send" type="button" onclick="Utils.sendCodeEvent('${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}/ProgettoTPSIT_war_exploded/change', 30)">Manda codice</button>
             <p id="timer"></p>
         </div>
         <div class="form-group">
@@ -46,3 +44,4 @@
 </div>
 </body>
 </html>
+<script src="ts/dist/Utils.js"></script>
