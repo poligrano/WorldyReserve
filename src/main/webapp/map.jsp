@@ -11,6 +11,311 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Progetto TPSIT</title>
     <link rel="stylesheet" href="css/map.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, sans-serif; }
+
+        #map { width: 100%; height: 100vh; }
+
+        /* ── Popup wrapper ── */
+        .hotel-popup {
+            background: #FAF6F1;
+            border-radius: 14px;
+            width: 360px;
+            border: 1.5px solid #DEC8A8;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(61,40,16,0.22);
+            font-family: system-ui, sans-serif;
+        }
+
+        /* arrow pointing down toward map pin */
+        .hotel-popup::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 12px solid transparent;
+            border-top-color: #DEC8A8;
+            border-bottom: 0;
+        }
+
+        /* ── Header ── */
+        .popup-header-img {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(160deg, #6B4A2A 0%, #3D2810 100%);
+            display: flex;
+            align-items: flex-end;
+            padding: 12px 14px;
+            position: relative;
+        }
+
+        .hotel-badge {
+            background: #A0734A;
+            color: #F0E6D6;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 3px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            position: absolute;
+            top: 12px;
+            left: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stars {
+            display: flex;
+            gap: 2px;
+            color: #E5B84A;
+            font-size: 14px;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #F0E6D6;
+            font-size: 16px;
+            transition: background 0.15s;
+        }
+        .close-btn:hover { background: rgba(255,255,255,0.28); }
+
+        .hotel-title-area { padding: 0 14px 12px; }
+
+        .hotel-name {
+            font-size: 17px;
+            font-weight: 500;
+            color: #F0E6D6;
+            margin: 0 0 2px;
+        }
+
+        .hotel-location {
+            font-size: 12px;
+            color: #DEC8A8;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── Body ── */
+        .popup-body {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* ── Action bar ── */
+        .action-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 20px;
+            border: 1px solid #DEC8A8;
+            background: white;
+            color: #6B4A2A;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            font-family: inherit;
+        }
+        .action-btn i { font-size: 16px; }
+        .action-btn:hover { background: #F0E6D6; }
+        .action-btn.liked   { background: #FCEBEB; color: #A32D2D; border-color: #F09595; }
+        .action-btn.favorited { background: #FAEEDA; color: #854F0B; border-color: #FAC775; }
+
+        .count { font-size: 12px; color: #A0734A; margin-left: 2px; }
+
+        /* ── Info section ── */
+        .info-section {
+            background: #F0E6D6;
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 500;
+            color: #6B4A2A;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin: 0 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .info-item { display: flex; flex-direction: column; gap: 2px; }
+
+        .info-label { font-size: 11px; color: #A0734A; }
+
+        .info-value {
+            font-size: 13px;
+            font-weight: 500;
+            color: #3D2810;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .info-value i { font-size: 14px; color: #A0734A; }
+
+        .score-pill {
+            background: #A0734A;
+            color: #FAF6F1;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* ── Comments ── */
+        .comments-section { display: flex; flex-direction: column; gap: 8px; }
+
+        .comment-card {
+            background: white;
+            border: 1px solid #F0E6D6;
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+
+        .comment-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .comment-avatar {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #DEC8A8;
+            color: #3D2810;
+            font-size: 10px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .comment-author { font-size: 12px; font-weight: 500; color: #3D2810; flex: 1; }
+        .comment-date   { font-size: 11px; color: #A0734A; }
+        .comment-text   { font-size: 12px; color: #6B4A2A; line-height: 1.5; margin: 0; }
+
+        .comment-input-row { display: flex; gap: 6px; align-items: center; }
+
+        .comment-input {
+            flex: 1;
+            border: 1px solid #DEC8A8;
+            border-radius: 20px;
+            padding: 7px 12px;
+            font-size: 13px;
+            background: white;
+            color: #3D2810;
+            outline: none;
+            font-family: inherit;
+        }
+        .comment-input::placeholder { color: #DEC8A8; }
+        .comment-input:focus { border-color: #A0734A; }
+
+        .send-btn {
+            background: #6B4A2A;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #FAF6F1;
+            font-size: 16px;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+        .send-btn:hover { background: #3D2810; }
+
+        .divider { height: 1px; background: #F0E6D6; }
+
+        /* ── Footer ── */
+        .popup-footer {
+            padding: 10px 14px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .view-btn {
+            background: transparent;
+            color: #6B4A2A;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #DEC8A8;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.15s;
+        }
+        .view-btn:hover { background: #F0E6D6; }
+
+        .reserve-btn {
+            background: #6B4A2A;
+            color: #FAF6F1;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.15s;
+        }
+        .reserve-btn:hover { background: #3D2810; }
+        .reserve-btn.reserved {
+            background: #27500A;
+            color: #EAF3DE;
+        }
+    </style>
 </head>
 <body>
 <header>
