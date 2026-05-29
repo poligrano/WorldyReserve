@@ -5,6 +5,9 @@ import {fromLonLat, transformExtent} from "ol/proj";
 import VectorSource from "ol/source/Vector";
 import {Utils} from "./Utils";
 import queryOverpass = Utils.queryOverpass;
+import ol from "ol/dist/ol";
+import layer = ol.layer;
+import VectorLayer from "ol/layer/Vector";
 
 function bboxBuffer(bbox: Extent, percentage: number): Extent
 {
@@ -44,19 +47,19 @@ function getOverpassCompatibleBbox(map: Map): Extent
     return transformExtent(map.getView().calculateExtent(map.getSize()), map.getView().getProjection(), "EPSG:4326");
 }
 
-type MapLoadState = { status: "idle" } | { status: "loaded"; bbox: Extent } | { status: "loading"; bbox: Extent; controller: AbortController };
+type MapLoadState = { status: "idle" } | { status: "loaded", bbox: Extent } | { status: "loading", bbox: Extent, controller: AbortController, loaded: MapLoadState };
 
-export function manageMapOnMove(map: Map, source: VectorSource, minimumZoom: number, bufferFactor: number): () => Promise<void>
+export function manageMapOnMove(map: Map, source: VectorSource, layer: VectorLayer, minimumZoom: number, bufferFactor: number): () => Promise<void>
 {
     let state: MapLoadState = { status: "idle" };
     async function load(bbox: Extent): Promise<void>
     {
         const controller: AbortController = new AbortController();
         const buffered: Extent = bboxBuffer(bbox, map.getView().getZoom()! * bufferFactor);
-        state = { status: "loading", bbox: buffered, controller };
+        state = { status: "loading", bbox: buffered, controller, loaded: state };
         const elements: any[] | false = await tryQueryOverpass(buffered, controller.signal);
         if (elements === false)
-            state = { status: "idle" };
+            state = state.loaded;
         else
         {
             source.clear();
@@ -70,11 +73,15 @@ export function manageMapOnMove(map: Map, source: VectorSource, minimumZoom: num
         if (zoom < minimumZoom)
         {
             if (state.status === "loading")
+            {
                 state.controller.abort();
-            source.clear();
-            state = { status: "idle" };
+                state = state.loaded;
+            }
+            layer.setVisible(false);
         }
         else
+        {
+            layer.setVisible(true);
             switch (state.status)
             {
                 case "idle":
@@ -88,9 +95,11 @@ export function manageMapOnMove(map: Map, source: VectorSource, minimumZoom: num
                     if (!containsExtent(state.bbox, currentBbox))
                     {
                         state.controller.abort();
-                        await load(currentBbox);
+                        if (state.loaded.status !== "loaded" || !containsExtent(state.loaded.bbox, currentBbox))
+                            await load(currentBbox);
                     }
                     break;
+            }
         }
     };
 }

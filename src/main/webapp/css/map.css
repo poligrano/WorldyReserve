@@ -95,10 +95,6 @@ header {
     height: 100%;
 }
 
-.ol-layer canvas {
-    filter: saturate(0.5) brightness(0.68) sepia(0.3);
-}
-
 .ol-zoom {
     top: 0.75rem;
     left: 0.75rem;

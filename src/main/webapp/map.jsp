@@ -11,24 +11,18 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Progetto TPSIT</title>
     <link rel="stylesheet" href="css/map.css">
+    <link rel="stylesheet" href="ts/node_modules/@tabler/icons-webfont/dist/tabler-icons.min.css" />
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: system-ui, sans-serif; }
-
-        #map { width: 100%; height: 100vh; }
-
-        /* ── Popup wrapper ── */
         .hotel-popup {
             background: #FAF6F1;
             border-radius: 14px;
             width: 360px;
-            border: 1.5px solid #DEC8A8;
+            border: 2px solid #DEC8A8;
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(61,40,16,0.22);
             font-family: system-ui, sans-serif;
         }
 
-        /* arrow pointing down toward map pin */
         .hotel-popup::after {
             content: '';
             position: absolute;
@@ -40,7 +34,6 @@
             border-bottom: 0;
         }
 
-        /* ── Header ── */
         .popup-header-img {
             width: 100%;
             height: 120px;
@@ -58,7 +51,7 @@
             font-weight: 500;
             padding: 3px 8px;
             border-radius: 20px;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.05rem;
             position: absolute;
             top: 12px;
             left: 14px;
@@ -114,7 +107,6 @@
             gap: 4px;
         }
 
-        /* ── Body ── */
         .popup-body {
             padding: 14px;
             display: flex;
@@ -122,7 +114,6 @@
             gap: 12px;
         }
 
-        /* ── Action bar ── */
         .action-bar {
             display: flex;
             align-items: center;
@@ -151,7 +142,6 @@
 
         .count { font-size: 12px; color: #A0734A; margin-left: 2px; }
 
-        /* ── Info section ── */
         .info-section {
             background: #F0E6D6;
             border-radius: 10px;
@@ -200,7 +190,6 @@
             display: inline-block;
         }
 
-        /* ── Comments ── */
         .comments-section { display: flex; flex-direction: column; gap: 8px; }
 
         .comment-card {
@@ -270,7 +259,6 @@
 
         .divider { height: 1px; background: #F0E6D6; }
 
-        /* ── Footer ── */
         .popup-footer {
             padding: 10px 14px;
             display: flex;
@@ -333,6 +321,49 @@
 </header>
 <div id="map-container">
     <div id="map"></div>
+</div>
+<div id="hotel-popup" class="hotel-popup">
+    <div class="popup-header">
+        <div class="popup-header-img">
+            <button class="close-btn" id="popup-close">
+                <i class="ti ti-x"></i>
+            </button>
+            <div class="hotel-title-area">
+                <p class="hotel-name" id="popup-name"></p>
+                <span class="hotel-location">
+                    <i class="ti ti-map-pin" style="font-size:12px;"></i>
+                    <span id="popup-address"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="popup-body">
+        <div class="action-bar">
+            <button class="action-btn" id="like-btn">
+                <i class="ti ti-heart"></i> Mi Piace <span class="count" id="like-count">0</span>
+            </button>
+            <button class="action-btn" id="fav-btn">
+                <i class="ti ti-bookmark"></i> Salva <span id="fav-label"></span>
+            </button>
+        </div>
+        <div class="divider"></div>
+        <div class="comments-section">
+            <p class="section-title"><i class="ti ti-messages"></i> Commenti</p>
+            <div id="comments-list"></div>
+            <div class="comment-input-row">
+                <input class="comment-input" id="new-comment" type="text" placeholder="Commenta..." />
+                <button class="send-btn" id="send-comment-btn">
+                    <i class="ti ti-send"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <div class="popup-footer">
+        <button class="reserve-btn" id="reserve-btn">
+            <i class="ti ti-calendar-check"></i> Prenota
+        </button>
+    </div>
 </div>
 </body>
 </html>

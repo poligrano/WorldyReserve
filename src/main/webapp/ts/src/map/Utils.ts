@@ -12,9 +12,9 @@ export namespace Utils
             t = setTimeout((): any => callback.apply(...args), timer);
         };
     }
-    export async function queryOverpass(bbox: Extent, signal: AbortSignal): Promise<any>
+    export async function queryOverpass(bbox: Extent, signal: AbortSignal | null = null): Promise<any>
     {
-        console.log(`Querying Overpass bbox: ${bbox}`);
+        console.log("Querying Overpass", bbox);
         const [minLon, minLat, maxLon, maxLat] = bbox;
         const query = `[out:json][timeout:10];
                     node(${minLat},${minLon},${maxLat},${maxLon})[tourism=hotel];
@@ -29,9 +29,9 @@ export namespace Utils
             body:`data=${encodeURIComponent(query)}`
         }).then((r: Response): Promise<any> => r.json());
     }
-    export async function queryNominatim(coord: Coordinate, signal: AbortSignal): Promise<any>
+    export async function queryNominatim(coord: Coordinate, signal: AbortSignal | null = null): Promise<any>
     {
-        console.log(`Querying Nominatim coord: ${coord}`);
+        console.log("Querying Nominatim", coord);
         return await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coord[0]}&lon=${coord[1]}&format=json&zoom=18`, {
             signal: signal,
             method: "GET",

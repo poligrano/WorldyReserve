@@ -4,11 +4,13 @@ import TileLayer from 'ol/layer/Tile.js';
 import OSM from 'ol/source/OSM.js';
 import {fromLonLat} from "ol/proj";
 import VectorSource from "ol/source/Vector";
-import {MapEvent, Overlay} from "ol";
+import {MapBrowserEvent, MapEvent, Overlay} from "ol";
 import VectorLayer from "ol/layer/Vector";
 import {Icon, Style} from "ol/style";
 import {Utils} from "./Utils";
 import {manageMapOnMove} from "./MapOnMove";
+import {manageMapOnClick} from "./MapOnClick";
+import {FeatureLike} from "ol/Feature";
 
 const src: VectorSource = new VectorSource();
 const layer: VectorLayer = new VectorLayer({
@@ -51,6 +53,12 @@ export const map = new Map({
 
 navigator.geolocation.getCurrentPosition((c: GeolocationPosition): void => map.getView().setCenter(fromLonLat([c.coords.longitude, c.coords.latitude])));
 
-const mapOnMove: () => Promise<void> = manageMapOnMove(map, src, 13, 2.5);
+const mapOnMove: () => Promise<void> = manageMapOnMove(map, src, layer, 13, 5);
 
-map.on("moveend", Utils.debounce((e: MapEvent) => mapOnMove(), 1000));
+map.on("moveend", Utils.debounce((e: MapEvent): Promise<void> => mapOnMove(), 1000));
+
+const mapOnClick: (e: MapBrowserEvent) => void = manageMapOnClick(overlay, document.getElementById("popup-close") as HTMLButtonElement);
+
+map.on("click", (e: MapBrowserEvent): void => mapOnClick(e));
+
+map.on('pointermove', (e: MapBrowserEvent): string => map.getTargetElement().style.cursor = (map.hasFeatureAtPixel(e.pixel) ? "pointer" : "inherit"));

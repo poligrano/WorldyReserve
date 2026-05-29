@@ -23,6 +23,7 @@
     "webpack-cli": "^7.0.2"
   },
   "dependencies": {
+    "@tabler/icons-webfont": "^3.44.0",
     "ol": "^10.9.0"
   }
 }
