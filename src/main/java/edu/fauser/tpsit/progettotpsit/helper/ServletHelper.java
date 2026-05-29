@@ -1,5 +1,6 @@
 package edu.fauser.tpsit.progettotpsit.helper;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,6 +69,24 @@ public class ServletHelper
         catch (IOException e)
         {
             request.getServletContext().log(e.getMessage(), e);
+        }
+    }
+    public static void restRespond(HttpServletResponse response, int sc, String message, ServletContext context)
+    {
+        restRespond(response, sc, message, "text/plain", context);
+    }
+    public static void restRespond(HttpServletResponse response, int sc, String message, String contentType, ServletContext context)
+    {
+        try
+        {
+            response.setStatus(sc);
+            response.setContentType(contentType);
+            response.getOutputStream().println(message);
+            response.flushBuffer();
+        }
+        catch (IOException e)
+        {
+            context.log(e.getMessage(), e);
         }
     }
 }

@@ -285,3 +285,18 @@ BEGIN
                   FROM    users_verify AS uv
               );
 END;
+
+CREATE PROCEDURE GET_USER_POI_META(v_id TYPE OF users.id, v_osm_id TYPE OF users_poi.osm_id, OUT v_own_comment TYPE OF users_poi.comment, OUT v_does_like TYPE OF users_poi.does_like, OUT v_favourite TYPE OF users_poi.favourite)
+BEGIN
+    SELECT  up.comment, up.does_like, up.favourite INTO v_own_comment, v_does_like, v_favourite
+    FROM    users_poi AS up
+    WHERE   up.user_id = v_id
+            AND up.osm_id = v_osm_id;
+END;
+
+CREATE PROCEDURE GET_POI_META(v_osm_id TYPE OF users_poi.osm_id, v_like_number BIGINT UNSIGNED)
+BEGIN
+    SELECT  COUNT(up.does_like = TRUE) INTO v_like_number
+    FROM    users_poi AS up
+    WHERE   up.osm_id = v_osm_id;
+END;

@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Optional;
 
 public class DBConnection implements AutoCloseable
@@ -133,6 +134,41 @@ public class DBConnection implements AutoCloseable
             stmt.registerOutParameter(2, Types.BLOB);
             stmt.execute();
             return stmt.getBlob(2);
+        }
+    }
+    private POIMeta getPoiMeta(long osmId, Long ignoreId) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL GET_POI_META(?, ?)}");
+             ResultSet res = con.createStatement().executeQuery("{SELECT up.comment FROM users_poi WHERE up.comment IS NOT NULL " + (ignoreId == null ? "" : "AND up.user_id != " + ignoreId) +"}"))
+        {
+            stmt.setLong(1, osmId);
+            stmt.registerOutParameter(2, Types.BIGINT);
+            stmt.execute();
+            return new POIMeta(osmId, stmt.getLong(2), buildCommentsArray(res));
+        }
+    }
+    private ArrayList<String> buildCommentsArray(ResultSet res) throws SQLException
+    {
+        ArrayList<String> comments = new ArrayList<>();
+        while (res.next())
+            comments.add(res.getString(1));
+        return comments;
+    }
+    public POIMeta getPoiMeta(long osmId) throws SQLException
+    {
+        return getPoiMeta(osmId, null);
+    }
+    public UserPOIMeta getUserPoiMeta(long osmId, long userId) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL GET_USER_POI_META(?, ?, ?, ?, ?)}"))
+        {
+            stmt.setLong(1, userId);
+            stmt.setLong(2, osmId);
+            stmt.registerOutParameter(3, Types.VARCHAR);
+            stmt.registerOutParameter(4, Types.BOOLEAN);
+            stmt.registerOutParameter(5, Types.BOOLEAN);
+            stmt.execute();
+            return new UserPOIMeta(userId, stmt.getBoolean(4), stmt.getBoolean(5), stmt.getString(3), getPoiMeta(osmId, userId));
         }
     }
     @Override

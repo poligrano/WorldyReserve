@@ -90,39 +90,25 @@ public class ChangePasswordServlet extends HttpServlet
                 {
                     request.setAttribute("code", con.setChangePassword(request.getParameter("email")));
                     MailHelper.sendMail(request.getParameter("email"), "Codice cambio password", request, response, "WEB-INF/email/change_code.jsp");
-                    restRespond(response, HttpServletResponse.SC_OK, "Codice inviato!");
+                    ServletHelper.restRespond(response, HttpServletResponse.SC_OK, "Codice inviato!", getServletContext());
                 }
                 else
-                    restRespond(response, HttpServletResponse.SC_BAD_REQUEST, "Completa il campo email");
+                    ServletHelper.restRespond(response, HttpServletResponse.SC_BAD_REQUEST, "Completa il campo email", getServletContext());
             }
             catch (SQLIntegrityConstraintViolationException e)
             {
-                restRespond(response, HttpServletResponse.SC_NOT_FOUND, "Utente non trovato");
+                ServletHelper.restRespond(response, HttpServletResponse.SC_NOT_FOUND, "Utente non trovato", getServletContext());
             }
         }
         catch (SendFailedException e)
         {
             log(e.getMessage(), e);
-            restRespond(response, HttpServletResponse.SC_BAD_GATEWAY, "Errore durante l'invio della mail!");
+            ServletHelper.restRespond(response, HttpServletResponse.SC_BAD_GATEWAY, "Errore durante l'invio della mail!", getServletContext());
         }
         catch (IOException | ServletException | SQLException | NoSuchAlgorithmException | MessagingException e)
         {
             log(e.getMessage(), e);
-            restRespond(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore del Server!");
-        }
-    }
-    private void restRespond(HttpServletResponse response, int sc, String message)
-    {
-        try
-        {
-            response.setStatus(sc);
-            response.setContentType("text/plain");
-            response.getOutputStream().println(message);
-            response.flushBuffer();
-        }
-        catch (IOException e)
-        {
-            log(e.getMessage(), e);
+            ServletHelper.restRespond(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore del Server!", getServletContext());
         }
     }
 }

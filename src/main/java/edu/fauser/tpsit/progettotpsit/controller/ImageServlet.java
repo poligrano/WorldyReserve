@@ -42,7 +42,7 @@ public class ImageServlet extends HttpServlet
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     {
-        ServletHelper.checkSession(request, response, "uid", this::manageNoSession, this::sendImage);
+        ServletHelper.checkSession(request, response, "uid", (req, resp) -> ServletHelper.restRespond(resp, HttpServletResponse.SC_UNAUTHORIZED, "Nessuna sessione trovata!", getServletContext()), this::sendImage);
     }
     private void sendImage(HttpServletRequest request, HttpServletResponse response)
     {
@@ -63,18 +63,5 @@ public class ImageServlet extends HttpServlet
     private InputStream getPfp(Blob pfp) throws SQLException
     {
         return (pfp == null ? getClass().getClassLoader().getResourceAsStream("pfp/default.jpg") : pfp.getBinaryStream());
-    }
-    private void manageNoSession(HttpServletRequest request, HttpServletResponse response)
-    {
-        try
-        {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("text/plain");
-            response.getOutputStream().println("Nessuna sessione trovata!");
-        }
-        catch (IOException e)
-        {
-            log(e.getMessage(), e);
-        }
     }
 }
