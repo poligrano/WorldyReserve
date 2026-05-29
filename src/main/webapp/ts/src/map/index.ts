@@ -57,7 +57,7 @@ const mapOnMove: () => Promise<void> = manageMapOnMove(map, src, layer, 13, 5);
 
 map.on("moveend", Utils.debounce((e: MapEvent): Promise<void> => mapOnMove(), 1000));
 
-const mapOnClick: (e: MapBrowserEvent) => void = manageMapOnClick(overlay, document.getElementById("popup-close") as HTMLButtonElement);
+const mapOnClick: (e: MapBrowserEvent) => void = manageMapOnClick(overlay);
 
 map.on("click", (e: MapBrowserEvent): void => mapOnClick(e));
 

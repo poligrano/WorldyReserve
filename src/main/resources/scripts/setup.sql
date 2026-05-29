@@ -294,7 +294,7 @@ BEGIN
             AND up.osm_id = v_osm_id;
 END;
 
-CREATE PROCEDURE GET_POI_META(v_osm_id TYPE OF users_poi.osm_id, v_like_number BIGINT UNSIGNED)
+CREATE PROCEDURE GET_POI_META(v_osm_id TYPE OF users_poi.osm_id, OUT v_like_number BIGINT UNSIGNED)
 BEGIN
     SELECT  COUNT(up.does_like = TRUE) INTO v_like_number
     FROM    users_poi AS up

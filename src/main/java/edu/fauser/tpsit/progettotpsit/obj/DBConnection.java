@@ -139,7 +139,7 @@ public class DBConnection implements AutoCloseable
     private POIMeta getPoiMeta(long osmId, Long ignoreId) throws SQLException
     {
         try (CallableStatement stmt = con.prepareCall("{CALL GET_POI_META(?, ?)}");
-             ResultSet res = con.createStatement().executeQuery("{SELECT up.comment FROM users_poi WHERE up.comment IS NOT NULL " + (ignoreId == null ? "" : "AND up.user_id != " + ignoreId) +"}"))
+             ResultSet res = con.createStatement().executeQuery("SELECT up.comment FROM users_poi AS up WHERE up.comment IS NOT NULL " + (ignoreId == null ? "" : "AND up.user_id != " + ignoreId)))
         {
             stmt.setLong(1, osmId);
             stmt.registerOutParameter(2, Types.BIGINT);

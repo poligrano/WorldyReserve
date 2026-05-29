@@ -32,7 +32,18 @@ export namespace Utils
     export async function queryNominatim(coord: Coordinate, signal: AbortSignal | null = null): Promise<any>
     {
         console.log("Querying Nominatim", coord);
-        return await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coord[0]}&lon=${coord[1]}&format=json&zoom=18`, {
+        return fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coord[0]}&lon=${coord[1]}&format=json&zoom=18`, {
+            signal: signal,
+            method: "GET",
+            headers: {
+                "User-Agent": navigator.userAgent
+            }
+        }).then((r) => r.json());
+    }
+    export async function queryMetaServlet(id: number, signal: AbortSignal | null = null): Promise<any>
+    {
+        console.log("Querying Project Servlet", id);
+        return fetch(`http://localhost:8080/ProgettoTPSIT_war_exploded/getmeta?id=${id}`, {
             signal: signal,
             method: "GET",
             headers: {

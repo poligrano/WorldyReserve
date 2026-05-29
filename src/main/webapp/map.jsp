@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Progetto TPSIT</title>
     <link rel="stylesheet" href="css/map.css">
-    <link rel="stylesheet" href="ts/node_modules/@tabler/icons-webfont/dist/tabler-icons.min.css" />
+    <link rel="stylesheet" href="ts/node_modules/@fortawesome/fontawesome-free/css/all.min.css" />
     <style>
         .hotel-popup {
             background: #FAF6F1;
@@ -326,12 +326,12 @@
     <div class="popup-header">
         <div class="popup-header-img">
             <button class="close-btn" id="popup-close">
-                <i class="ti ti-x"></i>
+                <i class="fas fa-xmark"></i>
             </button>
             <div class="hotel-title-area">
                 <p class="hotel-name" id="popup-name"></p>
                 <span class="hotel-location">
-                    <i class="ti ti-map-pin" style="font-size:12px;"></i>
+                    <i class="fas fa-location-dot" style="font-size:12px;"></i>
                     <span id="popup-address"></span>
                 </span>
             </div>
@@ -340,20 +340,20 @@
     <div class="popup-body">
         <div class="action-bar">
             <button class="action-btn" id="like-btn">
-                <i class="ti ti-heart"></i> Mi Piace <span class="count" id="like-count">0</span>
+                <i class="far fa-heart"></i> Mi Piace <span class="count" id="like-count">0</span>
             </button>
             <button class="action-btn" id="fav-btn">
-                <i class="ti ti-bookmark"></i> Salva <span id="fav-label"></span>
+                <i class="far fa-bookmark"></i> Salva <span id="fav-label"></span>
             </button>
         </div>
         <div class="divider"></div>
         <div class="comments-section">
-            <p class="section-title"><i class="ti ti-messages"></i> Commenti</p>
+            <p class="section-title"><i class="far fa-comment"></i> Commenti</p>
             <div id="comments-list"></div>
             <div class="comment-input-row">
                 <input class="comment-input" id="new-comment" type="text" placeholder="Commenta..." />
                 <button class="send-btn" id="send-comment-btn">
-                    <i class="ti ti-send"></i>
+                    <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
         </div>
@@ -361,7 +361,7 @@
     <div class="divider"></div>
     <div class="popup-footer">
         <button class="reserve-btn" id="reserve-btn">
-            <i class="ti ti-calendar-check"></i> Prenota
+            <i class="far fa-bookmark"></i> Prenota
         </button>
     </div>
 </div>
