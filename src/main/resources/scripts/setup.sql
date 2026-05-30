@@ -98,6 +98,7 @@ CREATE TABLE users_poi (
     osm_id BIGINT UNSIGNED,
     does_like BOOL NOT NULL DEFAULT FALSE,
     favourite BOOL NOT NULL DEFAULT FALSE,
+    last_interacted TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, osm_id),
     FOREIGN KEY (user_id) REFERENCES users(id)
         ON DELETE CASCADE
@@ -109,7 +110,7 @@ CREATE TABLE users_poi_comment (
     user_id BIGINT UNSIGNED NOT NULL,
     osm_id BIGINT UNSIGNED NOT NULL,
     comment VARCHAR(255) NOT NULL,
-    when_posted DATE NOT NULL,
+    when_posted DATE NOT NULL DEFAULT CURDATE(),
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users(id)
         ON DELETE CASCADE
@@ -310,4 +311,17 @@ BEGIN
     SELECT  COUNT(up.does_like = TRUE) INTO v_like_number
     FROM    users_poi AS up
     WHERE   up.osm_id = v_osm_id;
+END;
+
+CREATE PROCEDURE CHANGE_USER_POI_REL(v_osm_id TYPE OF users_poi.osm_id, v_id TYPE OF users.id, v_does_like TYPE OF users_poi.does_like, v_favourite TYPE OF users_poi.favourite)
+BEGIN
+   INSERT INTO users_poi(user_id, osm_id, does_like, favourite)
+   VALUES (v_id, v_osm_id, v_does_like, v_favourite)
+   ON DUPLICATE KEY UPDATE does_like = v_does_like, favourite = v_favourite, last_interacted = NOW();
+END;
+
+CREATE PROCEDURE POST_COMMENT(v_osm_id TYPE OF users_poi.osm_id, v_id TYPE OF users.id, v_comment TYPE OF users_poi_comment.comment)
+BEGIN
+    INSERT INTO users_poi_comment(user_id, osm_id, comment)
+    VALUES (v_id, v_osm_id, v_comment);
 END;

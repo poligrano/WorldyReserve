@@ -142,7 +142,7 @@ public class DBConnection implements AutoCloseable
     private POIMeta getPoiMeta(long osmId, Long ignoreId) throws SQLException
     {
         try (CallableStatement callStmt = con.prepareCall("{CALL GET_POI_META(?, ?)}");
-             PreparedStatement prepStmt = con.prepareCall("SELECT u.id, u.name, u.surname, upc.comment, upc.when_posted FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id != ?"))
+             PreparedStatement prepStmt = con.prepareCall("SELECT u.id, u.name, u.surname, upc.comment, upc.when_posted FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id != ? ORDER BY upc.when_posted ASC"))
         {
             callStmt.setLong(1, osmId);
             callStmt.registerOutParameter(2, Types.BIGINT);
@@ -173,7 +173,7 @@ public class DBConnection implements AutoCloseable
     public UserPOIMeta getUserPoiMeta(long osmId, long userId) throws SQLException
     {
         try (CallableStatement callStmt = con.prepareCall("{CALL GET_USER_POI_META(?, ?, ?, ?)}");
-             PreparedStatement prepStmt = con.prepareCall("SELECT u.name, u.surname, upc.comment, upc.when_posted FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id = ?"))
+             PreparedStatement prepStmt = con.prepareCall("SELECT u.name, u.surname, upc.comment, upc.when_posted FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id = ? ORDER BY upc.when_posted ASC"))
         {
             callStmt.setLong(1, userId);
             callStmt.setLong(2, osmId);
@@ -183,6 +183,27 @@ public class DBConnection implements AutoCloseable
             prepStmt.setLong(1, osmId);
             prepStmt.setLong(2, userId);
             return new UserPOIMeta(callStmt.getBoolean(3), callStmt.getBoolean(4), buildCommentsArray(prepStmt.executeQuery(), userId), getPoiMeta(osmId, userId));
+        }
+    }
+    public void changeUserPoiRel(long osmId, long userId, boolean doesLike, boolean favourite) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL CHANGE_USER_POI_REL(?, ?, ?, ?)}"))
+        {
+            stmt.setLong(1, osmId);
+            stmt.setLong(2, userId);
+            stmt.setBoolean(3, doesLike);
+            stmt.setBoolean(4, favourite);
+            stmt.execute();
+        }
+    }
+    public void postComment(long osmId, long userId, String comment) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL POST_COMMENT(?, ?, ?)}"))
+        {
+            stmt.setLong(1, osmId);
+            stmt.setLong(2, userId);
+            stmt.setString(3, comment);
+            stmt.execute();
         }
     }
     @Override

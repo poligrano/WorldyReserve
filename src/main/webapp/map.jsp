@@ -13,6 +13,32 @@
     <link rel="stylesheet" href="css/map.css">
     <link rel="stylesheet" href="ts/node_modules/@fortawesome/fontawesome-free/css/all.min.css" />
     <style>
+        #toast {
+            position: fixed;
+            top: 68px;
+            right: 1rem;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1rem;
+            background: rgba(192, 92, 58, 0.15);
+            border: 1px solid var(--error);
+            border-radius: 8px;
+            font-size: 0.88rem;
+            color: var(--text);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         .dropdown-wrap {
             position: relative;
         }
@@ -293,7 +319,15 @@
 
         .comment-author { font-size: 12px; font-weight: 500; color: #3D2810; flex: 1; }
         .comment-date   { font-size: 11px; color: #A0734A; }
-        .comment-text   { font-size: 12px; color: #6B4A2A; line-height: 1.5; margin: 0; }
+        .comment-text {
+            font-size: 12px;
+            color: #6B4A2A;
+            line-height: 1.5;
+            margin: 0;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
 
         .comment-input-row { display: flex; gap: 6px; align-items: center; }
 
@@ -379,7 +413,7 @@
 <body>
 <header>
     <img src="image" class="avatar" alt="!">
-    <span class="username">${name}</span>
+    <span class="username" id="username">${name}</span>
     <div class="header-spacer"></div>
     <div class="header-actions">
         <div class="dropdown-wrap">
@@ -442,7 +476,7 @@
             <p class="section-title"><i class="far fa-comment"></i> Commenti</p>
             <div id="comments-list"></div>
             <div class="comment-input-row">
-                <input class="comment-input" id="new-comment" type="text" placeholder="Commenta..." />
+                <input class="comment-input" id="new-comment" type="text" placeholder="Commenta..." maxlength="255" />
                 <button class="send-btn" id="send-comment-btn">
                     <i class="fas fa-paper-plane"></i>
                 </button>
@@ -455,6 +489,14 @@
             <i class="far fa-bookmark"></i> Prenota
         </button>
     </div>
+</div>
+<div id="toast">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <span id="toast-msg"></span>
 </div>
 </body>
 </html>

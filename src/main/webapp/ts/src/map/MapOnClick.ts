@@ -1,11 +1,12 @@
-import {MapEvent, Overlay, Map, MapBrowserEvent, Feature} from "ol";
+import {Overlay, MapBrowserEvent, Feature} from "ol";
 import {FeatureLike} from "ol/Feature";
 import {Utils} from "./Utils";
 import {fromLonLat} from "ol/proj";
-import ol from "ol/dist/ol";
-import array = ol.array;
+import notifyError = Utils.notifyError;
+import {UserName} from "./index";
+import getCurrentDateStr = Utils.getCurrentDateStr;
 
-type PopUpState = { status: "idle" } | { status: "loaded", unload: Function, loaded: Feature, updated: boolean };
+type PopUpState = { status: "idle" } | { status: "loaded", unload: Function, loaded: Feature };
 
 async function loadNominatim(poi: any): Promise<any | null>
 {
@@ -23,13 +24,28 @@ async function loadMeta(poi: any): Promise<any | null>
 
 function saveInFeature(feature: Feature, poi: any, nominatim: any | null, embedded_meta: any | null): void
 {
-    let updated: boolean;
-    if ((updated = nominatim !== null))
+    let updated: boolean = false;
+    if (nominatim !== null)
+    {
         poi.nominatim = nominatim;
-    if ((updated = embedded_meta !== null))
+        updated = true;
+    }
+    if (embedded_meta !== null)
+    {
         poi.embedded_meta = embedded_meta;
+        updated = true;
+    }
     if (updated)
         feature.setProperties(poi);
+}
+
+function saveNewOwnComment(feature: Feature, comment: string): { comment: string, display_name: string, when_posted: string }
+{
+    const poi: any = feature.getProperties();
+    const new_comment = { comment: comment, display_name: UserName, when_posted: getCurrentDateStr() };
+    (poi.embedded_meta.own_comments as Array<any>).push(new_comment);
+    feature.setProperties(poi);
+    return new_comment;
 }
 
 function createCommentElem(comment: any): HTMLDivElement
@@ -38,7 +54,7 @@ function createCommentElem(comment: any): HTMLDivElement
     elem.className = "comment-card";
     elem.innerHTML = `
           <div class="comment-meta">
-            <img class="comment-avatar" src="image?id=${comment.leaver_id}" alt="!" />
+            <img class="comment-avatar" src="image${comment.leaver_id !== undefined ? `?id=${comment.leaver_id}` : ""}" alt="!" />
             <span class="comment-author">${comment.display_name}</span>
             <span class="comment-date">${comment.when_posted}</span>
           </div>
@@ -48,6 +64,25 @@ function createCommentElem(comment: any): HTMLDivElement
 
 export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
 {
+    const popUpNameElem: HTMLParagraphElement = document.getElementById("popup-name") as HTMLParagraphElement;
+    const popUpAddrElem: HTMLSpanElement = document.getElementById("popup-address") as HTMLSpanElement;
+    const popUpLikeNumberElem: HTMLSpanElement = document.getElementById("like-count") as HTMLSpanElement;
+    const popUpLikeButtonElem: HTMLButtonElement = document.getElementById("like-btn") as HTMLButtonElement;
+    const popUpFavButtonElem: HTMLButtonElement = document.getElementById("fav-btn") as HTMLButtonElement;
+    const popUpCommentsElem: HTMLDivElement = document.getElementById("comments-list") as HTMLDivElement;
+    const popUpCommentTextElem: HTMLInputElement = document.getElementById("new-comment") as HTMLInputElement;
+    let state: PopUpState = { status: "idle" };
+    (document.getElementById("send-comment-btn") as HTMLButtonElement).onclick = async (): Promise<void> => {
+        const comment: string = popUpCommentTextElem.value.trim();
+        if (comment.length !== 0 && state.status == "loaded")
+        {
+            const res: string | true =  await Utils.queryPostComment(state.loaded.getId() as number, comment);
+            if (res !== true)
+                notifyError(res, 4000);
+            else
+                renderNewOwnComment(saveNewOwnComment(state.loaded, comment));
+        }
+    }
     (document.getElementById("popup-close") as HTMLButtonElement).onclick = unload;
     (document.getElementById("like-btn") as HTMLButtonElement).onclick = () => {
         if (state.status === "loaded")
@@ -57,7 +92,6 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
             poi.embedded_meta.does_like = !poi.embedded_meta.does_like;
             state.loaded.setProperties(poi);
             renderLike(poi.embedded_meta.does_like, poi.embedded_meta.poi.like_number);
-            state.updated = true;
         }
     }
     (document.getElementById("fav-btn") as HTMLButtonElement).onclick = () => {
@@ -67,19 +101,26 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
             poi.embedded_meta.favourite = !poi.embedded_meta.favourite;
             state.loaded.setProperties(poi);
             renderFavourite(poi.embedded_meta.favourite);
-            state.updated = true;
         }
     }
-    const popUpNameElem: HTMLParagraphElement = document.getElementById("popup-name") as HTMLParagraphElement;
-    const popUpAddrElem: HTMLSpanElement = document.getElementById("popup-address") as HTMLSpanElement;
-    const popUpLikeNumberElem: HTMLSpanElement = document.getElementById("like-count") as HTMLSpanElement;
-    const popUpLikeButtonElem: HTMLButtonElement = document.getElementById("like-btn") as HTMLButtonElement;
-    const popUpFavButtonElem: HTMLButtonElement = document.getElementById("fav-btn") as HTMLButtonElement;
-    const popUpCommentsElem: HTMLDivElement = document.getElementById("comments-list") as HTMLDivElement;
-    let state: PopUpState = { status: "idle" };
-    function unload(): void
+    function renderNewOwnComment(comment: { display_name: string, when_posted: string }): void
+    {
+        const commentElem: HTMLDivElement = createCommentElem(comment);
+        if (popUpCommentsElem.firstChild == null)
+            popUpCommentsElem.appendChild(commentElem)
+        else
+            popUpCommentsElem.firstChild.before(commentElem);
+        popUpCommentTextElem.value = "";
+    }
+    async function unload(): Promise<void>
     {
         overlay.setPosition(undefined);
+        if (state.status === "loaded")
+        {
+            const res: string | true = await Utils.queryUpdateMeta(state.loaded.getId() as number, state.loaded.getProperties().embedded_meta.does_like, state.loaded.getProperties().embedded_meta.favourite)
+            if (res !== true)
+                notifyError(res, 4000);
+        }
         state = { status: "idle" };
     }
     async function load(feature: FeatureLike): Promise<void>
@@ -112,7 +153,7 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
         popUpAddrElem.textContent = poi.nominatim.display_name;
         renderLike(poi.embedded_meta.does_like, poi.embedded_meta.poi.like_number);
         renderFavourite(poi.embedded_meta.favourite);
-        renderComments([...(poi.embedded_meta.own_comments as Array<any>), ...(poi.embedded_meta.poi.comments as Array<any>)]);
+        renderComments([...(poi.embedded_meta.own_comments as Array<any>).reverse(), ...(poi.embedded_meta.poi.comments as Array<any>).reverse()]);
         overlay.setPosition(fromLonLat([poi.lon, poi.lat]));
     }
     return async (e: MapBrowserEvent): Promise<void> => {
@@ -121,7 +162,7 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
         const feature: FeatureLike | undefined = e.map.forEachFeatureAtPixel(e.pixel, (f: FeatureLike): FeatureLike => f);
         if (feature !== undefined)
         {
-            state = { status: "loaded", unload: unload, loaded: feature as Feature, updated: false };
+            state = { status: "loaded", unload: unload, loaded: feature as Feature };
             await load(feature);
         }
     }

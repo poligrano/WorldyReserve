@@ -3,6 +3,7 @@ import {Coordinate} from "ol/coordinate";
 
 export namespace Utils
 {
+    const ProjectServerURL = "http://localhost:8080/ProgettoTPSIT_war_exploded";
     export function debounce(callback: Function, timer: number): (...args: any[]) => void
     {
         let t: number;
@@ -43,7 +44,7 @@ export namespace Utils
     export async function queryMetaServlet(id: number, signal: AbortSignal | null = null): Promise<any>
     {
         console.log("Querying Project Servlet Meta GET", id);
-        return fetch(`http://localhost:8080/ProgettoTPSIT_war_exploded/getmeta?id=${id}`, {
+        return fetch(`${ProjectServerURL}/getmeta?id=${id}`, {
             signal: signal,
             method: "GET",
             headers: {
@@ -51,15 +52,46 @@ export namespace Utils
             }
         }).then((r) => r.json());
     }
-    export async function queryUpdateMeta(does_like: boolean, favourite: boolean, signal: AbortSignal | null = null): Promise<boolean>
+    export async function queryUpdateMeta(id: number, does_like: boolean, favourite: boolean, signal: AbortSignal | null = null): Promise<string | true>
     {
         console.log("Querying Project Servlet Meta Update", does_like, favourite);
-        return (await fetch(`http://localhost:8080/ProgettoTPSIT_war_exploded/updatemeta?does_like=${does_like}&favourite=${favourite}`, {
+        return fetch(`${ProjectServerURL}/updatemeta?id=${id}&does_like=${does_like}&favourite=${favourite}`, {
             signal: signal,
             method: "GET",
             headers: {
                 "User-Agent": navigator.userAgent
             }
-        })).ok;
+        }).then(async (r: Response): Promise<string | true> => (r.ok ? true : await r.text()));
+    }
+    export async function queryPostComment(id: number, comment: string, signal: AbortSignal | null = null): Promise<string | true>
+    {
+        console.log("Querying Project Servlet Post Comment", comment);
+        return fetch(`${ProjectServerURL}/updatemeta`, {
+            signal: signal,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": navigator.userAgent
+            },
+            body: `id=${encodeURIComponent(id)}&comment=${encodeURIComponent(comment)}`
+        }).then(async (r: Response): Promise<string | true> => (r.ok ? true : await r.text()));
+    }
+    function initNotifyError(): (mx: string, duration: number) => void
+    {
+        let timer: number | undefined = undefined;
+        const err: HTMLDivElement = document.getElementById("toast") as HTMLDivElement;
+        const errMx: HTMLSpanElement = document.getElementById("toast-msg") as HTMLSpanElement;
+        return (mx: string, duration: number): void => {
+            clearTimeout(timer);
+            err.classList.remove("show");
+            errMx.textContent = mx;
+            err.classList.add("show");
+            timer = setTimeout((): void => err.classList.remove("show"), duration);
+        }
+    }
+    export const notifyError: (mx: string, duration: number) => void = initNotifyError();
+    export function getCurrentDateStr(): string
+    {
+        return (new Date()).toISOString().substring(0, 10);
     }
 }

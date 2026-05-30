@@ -11,6 +11,8 @@ import {Utils} from "./Utils";
 import {manageMapOnMove} from "./MapOnMove";
 import {manageMapOnClick} from "./MapOnClick";
 
+export const UserName: string = document.getElementById("username")!.textContent;
+
 function initDropDownMenuEvents(): void
 {
     const settingsButtonElem: HTMLButtonElement = document.getElementById("settings-btn") as HTMLButtonElement;

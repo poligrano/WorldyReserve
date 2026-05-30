@@ -65,6 +65,7 @@ public class ImageServlet extends HttpServlet
         catch (SQLException | IOException e)
         {
             log(e.getMessage(), e);
+            ServletHelper.restRespond(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore del Server!", getServletContext());
         }
     }
     private InputStream getPfp(Blob pfp) throws SQLException

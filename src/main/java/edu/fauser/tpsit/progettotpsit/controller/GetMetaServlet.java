@@ -56,6 +56,7 @@ public class GetMetaServlet extends HttpServlet
         catch (SQLException e)
         {
             log(e.getMessage(), e);
+            ServletHelper.restRespond(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore del Server!", getServletContext());
         }
     }
 }
