@@ -13,6 +13,83 @@
     <link rel="stylesheet" href="css/map.css">
     <link rel="stylesheet" href="ts/node_modules/@fortawesome/fontawesome-free/css/all.min.css" />
     <style>
+        .dropdown-wrap {
+            position: relative;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 160px;
+            background: rgba(30, 19, 8, 0.96);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow:
+                    0 0 0 1px rgba(200,121,65,0.08),
+                    0 8px 32px rgba(0,0,0,0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-6px) scale(0.97);
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .dropdown.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+
+        .dropdown::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 12%; right: 12%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.5;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.65rem 1rem;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text);
+            text-decoration: none;
+            transition: background 0.15s, color 0.15s;
+        }
+        .dropdown-item svg {
+            width: 15px; height: 15px;
+            flex-shrink: 0;
+            color: var(--muted);
+            transition: color 0.15s;
+        }
+        .dropdown-item:hover {
+            background: rgba(200,121,65,0.08);
+            color: var(--accent-h);
+        }
+        .dropdown-item:hover svg { color: var(--accent); }
+
+        .dropdown-item--danger { color: var(--error); }
+        .dropdown-item--danger svg { color: var(--error); opacity: 0.7; }
+        .dropdown-item--danger:hover {
+            background: rgba(192,92,58,0.12);
+            color: #e07055;
+        }
+        .dropdown-item--danger:hover svg { color: #e07055; opacity: 1; }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0 0.75rem;
+            opacity: 0.6;
+        }
+
         .hotel-popup {
             background: #FAF6F1;
             border-radius: 14px;
@@ -210,13 +287,7 @@
             width: 22px;
             height: 22px;
             border-radius: 50%;
-            background: #DEC8A8;
-            color: #3D2810;
-            font-size: 10px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            object-fit: cover;
             flex-shrink: 0;
         }
 
@@ -311,12 +382,32 @@
     <span class="username">${name}</span>
     <div class="header-spacer"></div>
     <div class="header-actions">
-        <button class="icon-btn" title="Impostazioni">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg>
-        </button>
+        <div class="dropdown-wrap">
+            <button class="icon-btn" id="settings-btn" title="Impostazioni">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </button>
+            <div class="dropdown" id="dropdown">
+                <a href="/profile" class="dropdown-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Profilo
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="logout" class="dropdown-item dropdown-item--danger">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Logout
+                </a>
+            </div>
+        </div>
     </div>
 </header>
 <div id="map-container">
@@ -343,7 +434,7 @@
                 <i class="far fa-heart"></i> Mi Piace <span class="count" id="like-count">0</span>
             </button>
             <button class="action-btn" id="fav-btn">
-                <i class="far fa-bookmark"></i> Salva <span id="fav-label"></span>
+                <i class="far fa-bookmark"></i> Salva
             </button>
         </div>
         <div class="divider"></div>

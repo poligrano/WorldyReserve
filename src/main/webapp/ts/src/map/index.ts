@@ -10,7 +10,22 @@ import {Icon, Style} from "ol/style";
 import {Utils} from "./Utils";
 import {manageMapOnMove} from "./MapOnMove";
 import {manageMapOnClick} from "./MapOnClick";
-import {FeatureLike} from "ol/Feature";
+
+function initDropDownMenuEvents(): void
+{
+    const settingsButtonElem: HTMLButtonElement = document.getElementById("settings-btn") as HTMLButtonElement;
+    const dropDownMenuElem: HTMLDivElement = document.getElementById("dropdown") as HTMLDivElement;
+    settingsButtonElem.onclick = (): boolean => settingsButtonElem.classList.toggle("active", dropDownMenuElem.classList.toggle("open"));
+    document.onclick = (e: PointerEvent) => {
+        if (!settingsButtonElem.contains(e.target as Node) && !dropDownMenuElem.contains(e.target as Node))
+        {
+            settingsButtonElem.classList.remove("active");
+            dropDownMenuElem.classList.remove("open");
+        }
+    }
+}
+
+initDropDownMenuEvents();
 
 const src: VectorSource = new VectorSource();
 const layer: VectorLayer = new VectorLayer({
