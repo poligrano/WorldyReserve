@@ -98,8 +98,19 @@ CREATE TABLE users_poi (
     osm_id BIGINT UNSIGNED,
     does_like BOOL NOT NULL DEFAULT FALSE,
     favourite BOOL NOT NULL DEFAULT FALSE,
-    comment VARCHAR(255),
     PRIMARY KEY (user_id, osm_id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT
+);
+
+CREATE TABLE users_poi_comment (
+    id TINYINT UNSIGNED AUTO_INCREMENT,
+    user_id BIGINT UNSIGNED NOT NULL,
+    osm_id BIGINT UNSIGNED NOT NULL,
+    comment VARCHAR(255) NOT NULL,
+    when_posted DATE NOT NULL,
+    PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users(id)
         ON DELETE CASCADE
         ON UPDATE RESTRICT
@@ -286,9 +297,9 @@ BEGIN
               );
 END;
 
-CREATE PROCEDURE GET_USER_POI_META(v_id TYPE OF users.id, v_osm_id TYPE OF users_poi.osm_id, OUT v_own_comment TYPE OF users_poi.comment, OUT v_does_like TYPE OF users_poi.does_like, OUT v_favourite TYPE OF users_poi.favourite)
+CREATE PROCEDURE GET_USER_POI_META(v_id TYPE OF users.id, v_osm_id TYPE OF users_poi.osm_id, OUT v_does_like TYPE OF users_poi.does_like, OUT v_favourite TYPE OF users_poi.favourite)
 BEGIN
-    SELECT  up.comment, up.does_like, up.favourite INTO v_own_comment, v_does_like, v_favourite
+    SELECT  up.does_like, up.favourite INTO v_does_like, v_favourite
     FROM    users_poi AS up
     WHERE   up.user_id = v_id
             AND up.osm_id = v_osm_id;

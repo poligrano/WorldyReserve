@@ -1,5 +1,4 @@
 @import "color_theme.css";
-@import url("https://fonts.googleapis.com");
 
 *, *::before, *::after {
     box-sizing: border-box;
@@ -71,7 +70,8 @@ header {
     justify-content: center;
     transition: background 0.18s, color 0.18s, border-color 0.18s;
 }
-.icon-btn:hover {
+.icon-btn:hover,
+.icon-btn.active {
     background: rgba(200,121,65,0.1);
     border-color: var(--accent);
     color: var(--accent);

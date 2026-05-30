@@ -42,7 +42,7 @@ export namespace Utils
     }
     export async function queryMetaServlet(id: number, signal: AbortSignal | null = null): Promise<any>
     {
-        console.log("Querying Project Servlet", id);
+        console.log("Querying Project Servlet Meta GET", id);
         return fetch(`http://localhost:8080/ProgettoTPSIT_war_exploded/getmeta?id=${id}`, {
             signal: signal,
             method: "GET",
@@ -50,5 +50,16 @@ export namespace Utils
                 "User-Agent": navigator.userAgent
             }
         }).then((r) => r.json());
+    }
+    export async function queryUpdateMeta(does_like: boolean, favourite: boolean, signal: AbortSignal | null = null): Promise<boolean>
+    {
+        console.log("Querying Project Servlet Meta Update", does_like, favourite);
+        return (await fetch(`http://localhost:8080/ProgettoTPSIT_war_exploded/updatemeta?does_like=${does_like}&favourite=${favourite}`, {
+            signal: signal,
+            method: "GET",
+            headers: {
+                "User-Agent": navigator.userAgent
+            }
+        })).ok;
     }
 }

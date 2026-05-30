@@ -1,5 +1,8 @@
 package edu.fauser.tpsit.progettotpsit.obj;
 
+import edu.fauser.tpsit.progettotpsit.entity.Comment;
+import edu.fauser.tpsit.progettotpsit.entity.POIMeta;
+import edu.fauser.tpsit.progettotpsit.entity.UserPOIMeta;
 import edu.fauser.tpsit.progettotpsit.helper.HashHelper;
 import edu.fauser.tpsit.progettotpsit.singleton.EnvVar;
 
@@ -138,20 +141,29 @@ public class DBConnection implements AutoCloseable
     }
     private POIMeta getPoiMeta(long osmId, Long ignoreId) throws SQLException
     {
-        try (CallableStatement stmt = con.prepareCall("{CALL GET_POI_META(?, ?)}");
-             ResultSet res = con.createStatement().executeQuery("SELECT up.comment FROM users_poi AS up WHERE up.comment IS NOT NULL " + (ignoreId == null ? "" : "AND up.user_id != " + ignoreId)))
+        try (CallableStatement callStmt = con.prepareCall("{CALL GET_POI_META(?, ?)}");
+             PreparedStatement prepStmt = con.prepareCall("SELECT u.id, u.name, u.surname, upc.comment, upc.when_posted FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id != ?"))
         {
-            stmt.setLong(1, osmId);
-            stmt.registerOutParameter(2, Types.BIGINT);
-            stmt.execute();
-            return new POIMeta(osmId, stmt.getLong(2), buildCommentsArray(res));
+            callStmt.setLong(1, osmId);
+            callStmt.registerOutParameter(2, Types.BIGINT);
+            callStmt.execute();
+            prepStmt.setLong(1, osmId);
+            prepStmt.setLong(2, (ignoreId == null ? 0 : ignoreId));
+            return new POIMeta(callStmt.getLong(2), buildCommentsArray(prepStmt.executeQuery()));
         }
     }
-    private ArrayList<String> buildCommentsArray(ResultSet res) throws SQLException
+    private ArrayList<Comment> buildCommentsArray(ResultSet res) throws SQLException
     {
-        ArrayList<String> comments = new ArrayList<>();
+        ArrayList<Comment> comments = new ArrayList<>();
         while (res.next())
-            comments.add(res.getString(1));
+            comments.add(new Comment(res.getLong(1), res.getString(2) + " " + res.getString(3), res.getString(4), res.getDate(5)));
+        return comments;
+    }
+    private ArrayList<Comment> buildCommentsArray(ResultSet res, long fixedId) throws SQLException
+    {
+        ArrayList<Comment> comments = new ArrayList<>();
+        while (res.next())
+            comments.add(new Comment(fixedId, res.getString(1) + " " + res.getString(2), res.getString(3), res.getDate(4)));
         return comments;
     }
     public POIMeta getPoiMeta(long osmId) throws SQLException
@@ -160,15 +172,17 @@ public class DBConnection implements AutoCloseable
     }
     public UserPOIMeta getUserPoiMeta(long osmId, long userId) throws SQLException
     {
-        try (CallableStatement stmt = con.prepareCall("{CALL GET_USER_POI_META(?, ?, ?, ?, ?)}"))
+        try (CallableStatement callStmt = con.prepareCall("{CALL GET_USER_POI_META(?, ?, ?, ?)}");
+             PreparedStatement prepStmt = con.prepareCall("SELECT u.name, u.surname, upc.comment, upc.when_posted FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id = ?"))
         {
-            stmt.setLong(1, userId);
-            stmt.setLong(2, osmId);
-            stmt.registerOutParameter(3, Types.VARCHAR);
-            stmt.registerOutParameter(4, Types.BOOLEAN);
-            stmt.registerOutParameter(5, Types.BOOLEAN);
-            stmt.execute();
-            return new UserPOIMeta(userId, stmt.getBoolean(4), stmt.getBoolean(5), stmt.getString(3), getPoiMeta(osmId, userId));
+            callStmt.setLong(1, userId);
+            callStmt.setLong(2, osmId);
+            callStmt.registerOutParameter(3, Types.BOOLEAN);
+            callStmt.registerOutParameter(4, Types.BOOLEAN);
+            callStmt.execute();
+            prepStmt.setLong(1, osmId);
+            prepStmt.setLong(2, userId);
+            return new UserPOIMeta(callStmt.getBoolean(3), callStmt.getBoolean(4), buildCommentsArray(prepStmt.executeQuery(), userId), getPoiMeta(osmId, userId));
         }
     }
     @Override

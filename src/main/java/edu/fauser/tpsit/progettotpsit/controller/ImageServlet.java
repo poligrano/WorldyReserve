@@ -42,11 +42,18 @@ public class ImageServlet extends HttpServlet
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     {
-        ServletHelper.checkSession(request, response, "uid", (req, resp) -> ServletHelper.restRespond(resp, HttpServletResponse.SC_UNAUTHORIZED, "Nessuna sessione trovata!", getServletContext()), this::sendImage);
+        ServletHelper.checkSession(request, response, "uid", (req, resp) -> ServletHelper.restRespond(resp, HttpServletResponse.SC_UNAUTHORIZED, "Nessuna sessione trovata!", getServletContext()), this::manageSendImage);
     }
-    private void sendImage(HttpServletRequest request, HttpServletResponse response)
+    private void manageSendImage(HttpServletRequest request, HttpServletResponse response)
     {
-        try (InputStream is = getPfp(con.getUserPfp((Long) request.getSession().getAttribute("uid"))))
+        if (ServletHelper.checkParams(request, "id"))
+            sendImage(request, response, Long.parseLong(request.getParameter("id")));
+        else
+            sendImage(request, response, (Long) request.getSession().getAttribute("uid"));
+    }
+    private void sendImage(HttpServletRequest request, HttpServletResponse response, long id)
+    {
+        try (InputStream is = getPfp(con.getUserPfp(id)))
         {
             byte[] pfp = is.readAllBytes();
             response.setStatus(HttpServletResponse.SC_OK);
