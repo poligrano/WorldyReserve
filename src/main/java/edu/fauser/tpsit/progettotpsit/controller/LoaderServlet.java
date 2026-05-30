@@ -46,7 +46,7 @@ public class LoaderServlet extends HttpServlet
     {
         try
         {
-            request.setAttribute("name", con.retrieveUserName((Long) request.getSession().getAttribute("uid")).get());
+            request.setAttribute("name", con.retrieveUserName((Long) request.getSession().getAttribute("uid")));
             request.getRequestDispatcher("map.jsp").forward(request, response);
         }
         catch (SQLException | ServletException | IOException e)

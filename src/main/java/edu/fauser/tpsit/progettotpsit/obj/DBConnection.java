@@ -46,13 +46,24 @@ public class DBConnection implements AutoCloseable
             return (stmt.getLong(2) == 0 ? Optional.empty() : Optional.of(stmt.getLong(2)));
         }
     }
-    public Optional<String> retrieveUserName(Long uid) throws SQLException
+    public String retrieveUserName(long uid) throws SQLException
     {
-        try (ResultSet res = con.createStatement().executeQuery("SELECT u.name, u.surname " +
-                                                                "FROM users AS u " +
-                                                                "WHERE u.id = " + uid))
+        try (CallableStatement stmt = con.prepareCall("{CALL GET_USER_DISPLAY_NAME(?, ?)}"))
         {
-            return (res.next() ? Optional.of(res.getString("name") + " " + res.getString("surname")) : Optional.empty());
+            stmt.setLong(1, uid);
+            stmt.registerOutParameter(2, Types.VARCHAR);
+            stmt.execute();
+            return stmt.getString(2);
+        }
+    }
+    public String retrieveEmail(long uid) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL GET_USER_MAIL(?, ?)}"))
+        {
+            stmt.setLong(1, uid);
+            stmt.registerOutParameter(2, Types.VARCHAR);
+            stmt.execute();
+            return stmt.getString(2);
         }
     }
     public String insertNormalUser(String name, String surname, String email, String pass, Part pfp) throws SQLException, IOException
@@ -172,17 +183,18 @@ public class DBConnection implements AutoCloseable
     }
     public UserPOIMeta getUserPoiMeta(long osmId, long userId) throws SQLException
     {
-        try (CallableStatement callStmt = con.prepareCall("{CALL GET_USER_POI_META(?, ?, ?, ?)}");
+        try (CallableStatement callStmt = con.prepareCall("{CALL GET_USER_POI_META(?, ?, ?, ?, ?)}");
              PreparedStatement prepStmt = con.prepareCall("SELECT u.name, u.surname, upc.comment, upc.when_posted FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id = ? ORDER BY upc.when_posted ASC"))
         {
             callStmt.setLong(1, userId);
             callStmt.setLong(2, osmId);
             callStmt.registerOutParameter(3, Types.BOOLEAN);
             callStmt.registerOutParameter(4, Types.BOOLEAN);
+            callStmt.registerOutParameter(5, Types.BOOLEAN);
             callStmt.execute();
             prepStmt.setLong(1, osmId);
             prepStmt.setLong(2, userId);
-            return new UserPOIMeta(callStmt.getBoolean(3), callStmt.getBoolean(4), buildCommentsArray(prepStmt.executeQuery(), userId), getPoiMeta(osmId, userId));
+            return new UserPOIMeta(callStmt.getBoolean(3), callStmt.getBoolean(4), callStmt.getBoolean(5), buildCommentsArray(prepStmt.executeQuery(), userId), getPoiMeta(osmId, userId));
         }
     }
     public void changeUserPoiRel(long osmId, long userId, boolean doesLike, boolean favourite) throws SQLException
@@ -203,6 +215,27 @@ public class DBConnection implements AutoCloseable
             stmt.setLong(1, osmId);
             stmt.setLong(2, userId);
             stmt.setString(3, comment);
+            stmt.execute();
+        }
+    }
+    public long reservePoi(long osmId, long userId, Date start, Date end) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL RESERVE_POI(?, ?, ?, ?, ?)}"))
+        {
+            stmt.setLong(1, osmId);
+            stmt.setLong(2, userId);
+            stmt.setDate(3, start);
+            stmt.setDate(4, end);
+            stmt.registerOutParameter(5, Types.BIGINT);
+            stmt.execute();
+            return stmt.getLong(5);
+        }
+    }
+    public void deleteReservation(long id) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL DELETE_RESERVATION(?)}"))
+        {
+            stmt.setLong(1, id);
             stmt.execute();
         }
     }

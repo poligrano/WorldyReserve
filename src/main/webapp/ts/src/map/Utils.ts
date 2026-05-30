@@ -33,7 +33,7 @@ export namespace Utils
     export async function queryNominatim(coord: Coordinate, signal: AbortSignal | null = null): Promise<any>
     {
         console.log("Querying Nominatim", coord);
-        return fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coord[0]}&lon=${coord[1]}&format=json&zoom=18`, {
+        return fetch(`https://nominatim.openstreetmap.org/reverse?lat=${encodeURIComponent(coord[0])}&lon=${encodeURIComponent(coord[1])}&format=json&zoom=18`, {
             signal: signal,
             method: "GET",
             headers: {
@@ -44,7 +44,7 @@ export namespace Utils
     export async function queryMetaServlet(id: number, signal: AbortSignal | null = null): Promise<any>
     {
         console.log("Querying Project Servlet Meta GET", id);
-        return fetch(`${ProjectServerURL}/getmeta?id=${id}`, {
+        return fetch(`${ProjectServerURL}/getmeta?id=${encodeURIComponent(id)}`, {
             signal: signal,
             method: "GET",
             headers: {
@@ -54,8 +54,8 @@ export namespace Utils
     }
     export async function queryUpdateMeta(id: number, does_like: boolean, favourite: boolean, signal: AbortSignal | null = null): Promise<string | true>
     {
-        console.log("Querying Project Servlet Meta Update", does_like, favourite);
-        return fetch(`${ProjectServerURL}/updatemeta?id=${id}&does_like=${does_like}&favourite=${favourite}`, {
+        console.log("Querying Project Servlet Meta Update", id, does_like, favourite);
+        return fetch(`${ProjectServerURL}/updatemeta?id=${encodeURIComponent(id)}&does_like=${encodeURIComponent(does_like)}&favourite=${encodeURIComponent(favourite)}`, {
             signal: signal,
             method: "GET",
             headers: {
@@ -65,7 +65,7 @@ export namespace Utils
     }
     export async function queryPostComment(id: number, comment: string, signal: AbortSignal | null = null): Promise<string | true>
     {
-        console.log("Querying Project Servlet Post Comment", comment);
+        console.log("Querying Project Servlet Post Comment", id, comment);
         return fetch(`${ProjectServerURL}/updatemeta`, {
             signal: signal,
             method: "POST",

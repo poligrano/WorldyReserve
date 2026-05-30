@@ -4,12 +4,13 @@ import TileLayer from 'ol/layer/Tile.js';
 import OSM from 'ol/source/OSM.js';
 import {fromLonLat} from "ol/proj";
 import VectorSource from "ol/source/Vector";
-import {MapBrowserEvent, MapEvent, Overlay} from "ol";
+import {Feature, MapBrowserEvent, Overlay} from "ol";
 import VectorLayer from "ol/layer/Vector";
-import {Icon, Style} from "ol/style";
+import {Fill, Icon, Stroke, Style} from "ol/style";
 import {Utils} from "./Utils";
 import {manageMapOnMove} from "./MapOnMove";
 import {manageMapOnClick} from "./MapOnClick";
+import {Circle} from "ol/geom";
 
 export const UserName: string = document.getElementById("username")!.textContent;
 
@@ -68,11 +69,27 @@ export const map = new Map({
     })
 });
 
-navigator.geolocation.getCurrentPosition((c: GeolocationPosition): void => map.getView().setCenter(fromLonLat([c.coords.longitude, c.coords.latitude])));
+function initGeolocation(): void
+{
+    const feature: Feature = new Feature();
+    map.addLayer(new VectorLayer({
+        source: new VectorSource({
+            features: [feature]
+        }),
+        style: new Style({
+            fill: new Fill({ color: "rgba(4, 212, 224, 0.8)" }),
+            stroke: new Stroke({ color: "rgb(28, 123, 251)" })
+        })
+    }));
+    navigator.geolocation.getCurrentPosition((info: GeolocationPosition): void => map.getView().setCenter(fromLonLat([info.coords.longitude, info.coords.latitude])));
+    navigator.geolocation.watchPosition((info: GeolocationPosition): void => feature.setGeometry(new Circle(fromLonLat([info.coords.longitude, info.coords.latitude]), info.coords.accuracy)));
+}
+
+initGeolocation();
 
 const mapOnMove: () => Promise<void> = manageMapOnMove(map, src, layer, 13, 5);
 
-map.on("moveend", Utils.debounce((e: MapEvent): Promise<void> => mapOnMove(), 1000));
+map.on("moveend", Utils.debounce((): Promise<void> => mapOnMove(), 1000));
 
 const mapOnClick: (e: MapBrowserEvent) => void = manageMapOnClick(overlay);
 

@@ -129,6 +129,25 @@ CREATE TABLE users_reserve_poi (
         ON UPDATE RESTRICT
 );
 
+CREATE TRIGGER check_reservation
+BEFORE INSERT
+ON users_reserve_poi FOR EACH ROW
+BEGIN
+    IF  NEW.start < CURDATE()
+        OR NEW.end < NEW.start
+        OR NEW.start <= (
+                SELECT  urp.end
+                FROM    users_reserve_poi AS urp
+                WHERE   urp.osm_id = NEW.osm_id
+                        AND urp.user_id = NEW.user_id
+                ORDER BY    urp.end DESC
+                LIMIT 1
+            ) THEN
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "Invalid reservation";
+    END IF;
+END;
+
 CREATE PROCEDURE INSERT_NORMAL_USER(v_name TYPE OF users.name, v_surname TYPE OF users.surname, v_pfp TYPE OF users.pfp, v_email TYPE OF users_email.email, v_pass TYPE OF users_pass.pass, OUT v_code CHAR(32))
 BEGIN
     DECLARE v_pass_id TYPE OF users_pass.id;
@@ -298,12 +317,18 @@ BEGIN
               );
 END;
 
-CREATE PROCEDURE GET_USER_POI_META(v_id TYPE OF users.id, v_osm_id TYPE OF users_poi.osm_id, OUT v_does_like TYPE OF users_poi.does_like, OUT v_favourite TYPE OF users_poi.favourite)
+CREATE PROCEDURE GET_USER_POI_META(v_id TYPE OF users.id, v_osm_id TYPE OF users_poi.osm_id, OUT v_does_like TYPE OF users_poi.does_like, OUT v_favourite TYPE OF users_poi.favourite, OUT v_reserved BOOL)
 BEGIN
     SELECT  up.does_like, up.favourite INTO v_does_like, v_favourite
     FROM    users_poi AS up
     WHERE   up.user_id = v_id
             AND up.osm_id = v_osm_id;
+    SET v_reserved = CURDATE() < ANY (
+            SELECT  urp.end
+            FROM    users_reserve_poi AS urp
+            WHERE   urp.user_id = v_id
+                    AND urp.osm_id = v_osm_id
+        );
 END;
 
 CREATE PROCEDURE GET_POI_META(v_osm_id TYPE OF users_poi.osm_id, OUT v_like_number BIGINT UNSIGNED)
@@ -324,4 +349,32 @@ CREATE PROCEDURE POST_COMMENT(v_osm_id TYPE OF users_poi.osm_id, v_id TYPE OF us
 BEGIN
     INSERT INTO users_poi_comment(user_id, osm_id, comment)
     VALUES (v_id, v_osm_id, v_comment);
+END;
+
+CREATE PROCEDURE RESERVE_POI(v_osm_id TYPE OF users_reserve_poi.osm_id, v_id TYPE OF users.id, v_start TYPE OF users_reserve_poi.start, v_end TYPE OF users_reserve_poi.end, OUT v_reservation_id TYPE OF users_reserve_poi.id)
+BEGIN
+    INSERT INTO users_reserve_poi(user_id, osm_id, start, end)
+    VALUES (v_id, v_osm_id, v_start, v_end);
+    SET v_reservation_id = LAST_INSERT_ID();
+END;
+
+CREATE PROCEDURE DELETE_RESERVATION(v_id TYPE OF users_reserve_poi.id)
+BEGIN
+    DELETE FROM users_reserve_poi
+    WHERE id = v_id;
+END;
+
+CREATE PROCEDURE GET_USER_MAIL(v_id TYPE OF users.id, OUT v_email TYPE OF users_email.email)
+BEGIN
+    SELECT  ue.email INTO v_email
+    FROM    users AS u
+            INNER JOIN users_email AS ue ON u.email = ue.id
+    WHERE   u.id = v_id;
+END;
+
+CREATE PROCEDURE GET_USER_DISPLAY_NAME(v_id TYPE OF users.id, OUT v_display_name VARCHAR(60))
+BEGIN
+    SELECT  CONCAT(u.name, ' ', u.surname) INTO v_display_name
+    FROM    users AS u
+    WHERE   u.id = v_id;
 END;

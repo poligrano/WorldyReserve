@@ -71,6 +71,7 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
     const popUpFavButtonElem: HTMLButtonElement = document.getElementById("fav-btn") as HTMLButtonElement;
     const popUpCommentsElem: HTMLDivElement = document.getElementById("comments-list") as HTMLDivElement;
     const popUpCommentTextElem: HTMLInputElement = document.getElementById("new-comment") as HTMLInputElement;
+    const popUpReserveAElem: HTMLAnchorElement = document.getElementById("reserve-btn") as HTMLAnchorElement;
     let state: PopUpState = { status: "idle" };
     (document.getElementById("send-comment-btn") as HTMLButtonElement).onclick = async (): Promise<void> => {
         const comment: string = popUpCommentTextElem.value.trim();
@@ -103,15 +104,6 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
             renderFavourite(poi.embedded_meta.favourite);
         }
     }
-    function renderNewOwnComment(comment: { display_name: string, when_posted: string }): void
-    {
-        const commentElem: HTMLDivElement = createCommentElem(comment);
-        if (popUpCommentsElem.firstChild == null)
-            popUpCommentsElem.appendChild(commentElem)
-        else
-            popUpCommentsElem.firstChild.before(commentElem);
-        popUpCommentTextElem.value = "";
-    }
     async function unload(): Promise<void>
     {
         overlay.setPosition(undefined);
@@ -130,6 +122,30 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
         saveInFeature(feature as Feature, poi, nominatim, embedded_meta);
         if (state.status === "loaded")
             render(feature.getProperties());
+    }
+    function renderNewOwnComment(comment: { display_name: string, when_posted: string }): void
+    {
+        const commentElem: HTMLDivElement = createCommentElem(comment);
+        if (popUpCommentsElem.firstChild == null)
+            popUpCommentsElem.appendChild(commentElem)
+        else
+            popUpCommentsElem.firstChild.before(commentElem);
+        popUpCommentTextElem.value = "";
+    }
+    function renderReserved(reserved: boolean): void
+    {
+        if (reserved)
+        {
+            popUpReserveAElem.classList.add("reserved");
+            popUpReserveAElem.innerHTML = `<i class="fas fa-check"></i> Prenotato`;
+            popUpReserveAElem.style.pointerEvents = "none";
+        }
+        else
+        {
+            popUpReserveAElem.classList.remove("reserved");
+            popUpReserveAElem.innerHTML = `<i class="fas fa-calendar-check"></i> Prenota`;
+            popUpReserveAElem.style.pointerEvents = "auto";
+        }
     }
     function renderLike(does_like: boolean, like_number: number): void
     {
@@ -154,6 +170,8 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
         renderLike(poi.embedded_meta.does_like, poi.embedded_meta.poi.like_number);
         renderFavourite(poi.embedded_meta.favourite);
         renderComments([...(poi.embedded_meta.own_comments as Array<any>).reverse(), ...(poi.embedded_meta.poi.comments as Array<any>).reverse()]);
+        renderReserved(poi.embedded_meta.reserved);
+        popUpReserveAElem.href = `reserve.jsp?id=${encodeURIComponent(poi.id)}&name=${encodeURIComponent(poi.nominatim.name)}`;
         overlay.setPosition(fromLonLat([poi.lon, poi.lat]));
     }
     return async (e: MapBrowserEvent): Promise<void> => {
