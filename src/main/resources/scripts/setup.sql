@@ -337,9 +337,10 @@ END//
 
 CREATE PROCEDURE GET_POI_META(v_osm_id TYPE OF users_poi.osm_id, OUT v_like_number BIGINT UNSIGNED)
 BEGIN
-    SELECT  COUNT(up.does_like = TRUE) INTO v_like_number
+    SELECT  COUNT(up.does_like) INTO v_like_number
     FROM    users_poi AS up
-    WHERE   up.osm_id = v_osm_id;
+    WHERE   up.osm_id = v_osm_id
+            AND up.does_like = TRUE;
 END//
 
 CREATE PROCEDURE CHANGE_USER_POI_REL(v_osm_id TYPE OF users_poi.osm_id, v_id TYPE OF users.id, v_does_like TYPE OF users_poi.does_like, v_favourite TYPE OF users_poi.favourite)
