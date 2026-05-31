@@ -30,9 +30,9 @@ export namespace Utils
             body:`data=${encodeURIComponent(query)}`
         }).then((r: Response): Promise<any> => r.json());
     }
-    export async function queryNominatim(coord: Coordinate, signal: AbortSignal | null = null): Promise<any>
+    export async function queryReverseNominatim(coord: Coordinate, signal: AbortSignal | null = null): Promise<any>
     {
-        console.log("Querying Nominatim", coord);
+        console.log("Querying Nominatim Reverse", coord);
         return fetch(`https://nominatim.openstreetmap.org/reverse?lat=${encodeURIComponent(coord[0])}&lon=${encodeURIComponent(coord[1])}&format=json&zoom=18`, {
             signal: signal,
             method: "GET",
@@ -75,6 +75,24 @@ export namespace Utils
             },
             body: `id=${encodeURIComponent(id)}&comment=${encodeURIComponent(comment)}`
         }).then(async (r: Response): Promise<string | true> => (r.ok ? true : await r.text()));
+    }
+    export async function querySearchNominatim(search: string, signal: AbortSignal | null = null): Promise<Array<any>>
+    {
+        console.log("Querying Nominatim Search", search);
+        return Promise.all([fetch(`https://nominatim.openstreetmap.org/search?q=hotel ${search}&format=json&limit=5`, {
+            signal: signal,
+            method: "GET",
+            headers: {
+                "User-Agent": navigator.userAgent
+            }
+        }).then((r: Response) => r.json()),
+            fetch(`https://nominatim.openstreetmap.org/search?q=${search}&format=json&featureType=city&limit=3`, {
+                signal: signal,
+                method: "GET",
+                headers: {
+                    "User-Agent": navigator.userAgent
+                }
+            }).then((r: Response) => r.json())]).then((r: [any, any]) => [...r[0], ...r[1]]);
     }
     function initNotifyError(): (mx: string, duration: number) => void
     {

@@ -28,7 +28,42 @@ function initDropDownMenuEvents(): void
     }
 }
 
+function initSearchBarEvents(): void
+{
+    const searchBarElem: HTMLInputElement = document.getElementById("search-input") as HTMLInputElement;
+    const searchDropDownElem: HTMLDivElement = document.getElementById("search-dropdown") as HTMLDivElement;
+    function createFoundElem(found: any): HTMLButtonElement
+    {
+        const elem: HTMLButtonElement = document.createElement("button");
+        elem.className = "dropdown-item";
+        elem.textContent = `${found.display_name}`;
+        elem.onclick = (): void =>
+        {
+            map.getView().animate({ center: fromLonLat([found.lon, found.lat]), zoom: 15, duration: 600 });
+            searchBarElem.value = found.display_name;
+        }
+        return elem;
+    }
+    function lastSearchEvent(): () => Promise<void>
+    {
+        let controller: AbortController | null = null;
+        return async (): Promise<void> => {
+            const search: string = searchBarElem.value.trim();
+            if (search.length !== 0)
+            {
+                controller?.abort();
+                controller = new AbortController();
+                searchDropDownElem.replaceChildren(...(await Utils.querySearchNominatim(search, controller.signal)).map((f) => createFoundElem(f)));
+                searchDropDownElem.classList.add("open");
+            }
+        }
+    }
+    const searchEvent: () => Promise<void> = lastSearchEvent();
+    searchBarElem.onkeydown = Utils.debounce(() => searchEvent(), 400);
+}
+
 initDropDownMenuEvents();
+initSearchBarEvents();
 
 const src: VectorSource = new VectorSource();
 const layer: VectorLayer = new VectorLayer({
@@ -43,14 +78,14 @@ const layer: VectorLayer = new VectorLayer({
     })
 });
 
-const overlay = new Overlay({
+const overlay: Overlay = new Overlay({
     element: document.getElementById("hotel-popup")!,
     positioning: "bottom-center",
     stopEvent: true,
     offset: [0, -16],
 });
 
-export const map = new Map({
+export const map: Map = new Map({
     layers: [
         new TileLayer({
             source: new OSM(),
@@ -83,6 +118,7 @@ function initGeolocation(): void
     }));
     navigator.geolocation.getCurrentPosition((info: GeolocationPosition): void => map.getView().setCenter(fromLonLat([info.coords.longitude, info.coords.latitude])));
     navigator.geolocation.watchPosition((info: GeolocationPosition): void => feature.setGeometry(new Circle(fromLonLat([info.coords.longitude, info.coords.latitude]), info.coords.accuracy)));
+    (document.getElementById("locate-btn") as HTMLButtonElement).onclick = (): void => map.getView().animate({ center: (feature.getGeometry() as Circle).getCenter(), zoom: 15, duration: 600 })
 }
 
 initGeolocation();

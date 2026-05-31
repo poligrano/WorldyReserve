@@ -18,7 +18,41 @@
     <img src="image" class="avatar" alt="!">
     <span class="username" id="username">${name}</span>
     <div class="header-spacer"></div>
+    <div class="dropdown-wrap">
+        <div class="search-wrap" id="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="search-input" class="search-input" placeholder="Cerca un luogo..." autocomplete="off" />
+        </div>
+        <div class="dropdown" id="search-dropdown">
+            <span class="dropdown-label">Risultati</span>
+            <div class="dropdown-divider"></div>
+            <div id="search-results"></div>
+        </div>
+    </div>
     <div class="header-actions">
+        <button class="icon-btn" id="locate-btn" title="La mia posizione">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
+                <circle cx="12" cy="12" r="9"></circle>
+            </svg>
+        </button>
+        <div class="dropdown-wrap">
+            <button class="icon-btn" id="hotels-btn" title="Salvati">
+                <i class="far fa-bookmark"></i>
+            </button>
+            <div class="dropdown" id="hotels-dropdown">
+                <span class="dropdown-label">Hotel Salvati</span>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item" onclick="selectHotel('Grand Hotel Torino')">Grand Hotel Torino</button>
+                <button class="dropdown-item" onclick="selectHotel('Hotel Roma')">Hotel Roma</button>
+                <button class="dropdown-item" onclick="selectHotel('Mole Antonelliana Suites')">Mole Antonelliana Suites</button>
+                <button class="dropdown-item" onclick="selectHotel('Hotel Principi di Piemonte')">Hotel Principi di Piemonte</button>
+            </div>
+        </div>
         <div class="dropdown-wrap">
             <button class="icon-btn" id="settings-btn" title="Impostazioni">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

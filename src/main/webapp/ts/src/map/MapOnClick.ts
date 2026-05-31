@@ -11,7 +11,7 @@ type PopUpState = { status: "idle" } | { status: "loaded", unload: Function, loa
 async function loadNominatim(poi: any): Promise<any | null>
 {
     if (poi.nominatim === undefined)
-        return await Utils.queryNominatim([poi.lat, poi.lon]);
+        return await Utils.queryReverseNominatim([poi.lat, poi.lon]);
     return null;
 }
 
@@ -178,10 +178,17 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
         if (state.status === "loaded")
             state.unload();
         const feature: FeatureLike | undefined = e.map.forEachFeatureAtPixel(e.pixel, (f: FeatureLike): FeatureLike => f);
-        if (feature !== undefined)
+        if (feature !== undefined && feature.getId() !== undefined)
         {
             state = { status: "loaded", unload: unload, loaded: feature as Feature };
-            await load(feature);
+            try
+            {
+                await load(feature);
+            }
+            catch (e)
+            {
+                state = { status: "idle" };
+            }
         }
     }
 }
