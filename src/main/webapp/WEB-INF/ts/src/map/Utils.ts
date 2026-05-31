@@ -1,7 +1,5 @@
 import {Extent} from "ol/extent";
 import {Coordinate} from "ol/coordinate";
-import {fromLonLat} from "ol/proj";
-import {map} from "./index";
 
 export namespace Utils
 {

@@ -4,9 +4,6 @@ import {Point} from "ol/geom";
 import {fromLonLat, transformExtent} from "ol/proj";
 import VectorSource from "ol/source/Vector";
 import {Utils} from "./Utils";
-import queryOverpass = Utils.queryOverpass;
-import ol from "ol/dist/ol";
-import layer = ol.layer;
 import VectorLayer from "ol/layer/Vector";
 
 function bboxBuffer(bbox: Extent, percentage: number): Extent
@@ -33,7 +30,7 @@ async function tryQueryOverpass(bbox: Extent, signal: AbortSignal): Promise<Arra
 {
     try
     {
-        return await queryOverpass(bbox, signal).then((r: any): Array<any> => r.elements)
+        return await Utils.queryOverpass(bbox, signal).then((r: any): Array<any> => r.elements)
     }
     catch (e)
     {

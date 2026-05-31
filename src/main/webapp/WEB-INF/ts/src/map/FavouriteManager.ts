@@ -10,13 +10,13 @@ export class FavouriteManager
     constructor()
     {
         this.savedButtonElem.onclick = (): boolean => this.savedButtonElem.classList.toggle("active", this.dropDownElem.classList.toggle("open"));
-        document.onclick = (e: PointerEvent): void => {
+        document.addEventListener("click", (e: PointerEvent): void => {
             if (!this.savedButtonElem.contains(e.target as Node) && !this.dropDownElem.contains(e.target as Node))
             {
                 this.savedButtonElem.classList.remove("active");
                 this.dropDownElem.classList.remove("open");
             }
-        }
+        });
     }
     createSavedElem(saved: any): HTMLButtonElement
     {
@@ -25,7 +25,7 @@ export class FavouriteManager
         elem.className = "dropdown-item";
         elem.id = `osm_id${saved.osm_id}`;
         elem.textContent = saved.display_name;
-        elem.onclick = () => map.getView().animate({ center: fromLonLat([saved.lon, saved.lat]), zoom: 15, duration: 600 });
+        elem.onclick = () => map.getView().animate({ center: fromLonLat([saved.lon, saved.lat]), zoom: 10, duration: 600 });
         return elem;
     }
     public async addFromIds(...ids: number[]): Promise<void>

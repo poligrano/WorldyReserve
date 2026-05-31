@@ -28,7 +28,7 @@
             <input type="text" id="search-input" class="search-input" placeholder="Cerca un luogo..." autocomplete="off" />
         </div>
         <div class="dropdown" id="search-dropdown">
-            <span class="dropdown-label">Risultati</span>
+            <span class="dropdown-label" id="result-label">Risultati</span>
             <div class="dropdown-divider"></div>
             <div id="search-results"></div>
         </div>

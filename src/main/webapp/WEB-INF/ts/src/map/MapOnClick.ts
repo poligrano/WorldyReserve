@@ -2,9 +2,7 @@ import {Overlay, MapBrowserEvent, Feature} from "ol";
 import {FeatureLike} from "ol/Feature";
 import {Utils} from "./Utils";
 import {fromLonLat} from "ol/proj";
-import notifyError = Utils.notifyError;
-import {fav, map, UserName} from "./index";
-import getCurrentDateStr = Utils.getCurrentDateStr;
+import {fav, UserName} from "./index";
 
 type PopUpState = { status: "idle" } | { status: "loaded", unload: Function, loaded: Feature };
 
@@ -44,7 +42,7 @@ function saveInFeature(feature: Feature, poi: any, nominatim: any | null, embedd
 function saveNewOwnComment(feature: Feature, comment: string): { comment: string, display_name: string, when_posted: string }
 {
     const poi: any = feature.getProperties();
-    const new_comment = { comment: comment, display_name: UserName, when_posted: getCurrentDateStr() };
+    const new_comment = { comment: comment, display_name: UserName, when_posted: Utils.getCurrentDateStr() };
     (poi.embedded_meta.own_comments as Array<any>).push(new_comment);
     feature.setProperties(poi);
     return new_comment;
@@ -81,7 +79,7 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
         {
             const res: string | true =  await Utils.queryPostComment(state.loaded.getId() as number, comment);
             if (res !== true)
-                notifyError(res, 4000);
+                Utils.notifyError(res, 4000);
             else
                 renderNewOwnComment(saveNewOwnComment(state.loaded, comment));
         }
@@ -117,7 +115,7 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
         {
             const res: string | true = await Utils.queryUpdateMeta(state.loaded.getId() as number, state.loaded.getProperties().embedded_meta.does_like, state.loaded.getProperties().embedded_meta.favourite)
             if (res !== true)
-                notifyError(res, 4000);
+                Utils.notifyError(res, 4000);
         }
         state = { status: "idle" };
     }

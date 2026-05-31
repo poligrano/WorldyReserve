@@ -20,19 +20,21 @@ function initDropDownMenuEvents(): void
     const settingsButtonElem: HTMLButtonElement = document.getElementById("settings-btn") as HTMLButtonElement;
     const dropDownMenuElem: HTMLDivElement = document.getElementById("dropdown") as HTMLDivElement;
     settingsButtonElem.onclick = (): boolean => settingsButtonElem.classList.toggle("active", dropDownMenuElem.classList.toggle("open"));
-    document.onclick = (e: PointerEvent) => {
+    document.addEventListener("click", (e: PointerEvent) => {
         if (!settingsButtonElem.contains(e.target as Node) && !dropDownMenuElem.contains(e.target as Node))
         {
             settingsButtonElem.classList.remove("active");
             dropDownMenuElem.classList.remove("open");
         }
-    }
+    });
 }
 
 function initSearchBarEvents(): void
 {
     const searchBarElem: HTMLInputElement = document.getElementById("search-input") as HTMLInputElement;
     const searchDropDownElem: HTMLDivElement = document.getElementById("search-dropdown") as HTMLDivElement;
+    const searchDropItemsElem: HTMLDivElement = document.getElementById("search-results") as HTMLDivElement;
+    const searchLabelElem: HTMLSpanElement = document.getElementById("result-label") as HTMLSpanElement;
     function createFoundElem(found: any): HTMLButtonElement
     {
         const elem: HTMLButtonElement = document.createElement("button");
@@ -41,6 +43,7 @@ function initSearchBarEvents(): void
         elem.onclick = (): void =>
         {
             map.getView().animate({ center: fromLonLat([found.lon, found.lat]), zoom: 15, duration: 600 });
+            searchDropDownElem.classList.remove("open");
             searchBarElem.value = found.display_name;
         }
         return elem;
@@ -50,17 +53,35 @@ function initSearchBarEvents(): void
         let controller: AbortController | null = null;
         return async (): Promise<void> => {
             const search: string = searchBarElem.value.trim();
+            controller?.abort();
+            controller = new AbortController();
             if (search.length !== 0)
             {
-                controller?.abort();
-                controller = new AbortController();
-                searchDropDownElem.replaceChildren(...(await Utils.querySearchNominatim(search, controller.signal)).map((f: any): HTMLButtonElement => createFoundElem(f)));
+                searchDropItemsElem.replaceChildren(...(await Utils.querySearchNominatim(search, controller.signal)).map((f: any): HTMLButtonElement => createFoundElem(f)));
+                if (searchDropItemsElem.children.length === 0)
+                    searchLabelElem.textContent = "Nessun risultato";
+                else
+                    searchLabelElem.textContent = "Risultati";
                 searchDropDownElem.classList.add("open");
             }
+            else
+                searchDropDownElem.classList.remove("open");
         }
     }
     const searchEvent: () => Promise<void> = lastSearchEvent();
-    searchBarElem.onkeydown = Utils.debounce(() => searchEvent(), 400);
+    const debouncedEvent = Utils.debounce((): Promise<void> => searchEvent(), 400);
+    searchBarElem.oninput = (): void => {
+        searchDropDownElem.classList.remove("open");
+        debouncedEvent();
+    };
+    searchBarElem.onfocus = (): void => {
+        if (searchDropItemsElem.children.length !== 0)
+            searchDropDownElem.classList.add("open");
+    }
+    document.addEventListener("click", (e: PointerEvent) => {
+        if (!searchBarElem.contains(e.target as Node) && !searchDropDownElem.contains(e.target as Node))
+            searchDropDownElem.classList.remove("open");
+    });
 }
 
 export const fav: FavouriteManager = new FavouriteManager();
@@ -121,7 +142,7 @@ function initGeolocation(): void
     }));
     navigator.geolocation.getCurrentPosition((info: GeolocationPosition): void => map.getView().setCenter(fromLonLat([info.coords.longitude, info.coords.latitude])));
     navigator.geolocation.watchPosition((info: GeolocationPosition): void => feature.setGeometry(new Circle(fromLonLat([info.coords.longitude, info.coords.latitude]), info.coords.accuracy)));
-    (document.getElementById("locate-btn") as HTMLButtonElement).onclick = (): void => map.getView().animate({ center: (feature.getGeometry() as Circle).getCenter(), zoom: 15, duration: 600 })
+    (document.getElementById("locate-btn") as HTMLButtonElement).onclick = (): void => map.getView().animate({ center: (feature.getGeometry() as Circle).getCenter(), zoom: 15, duration: 600 });
 }
 
 initGeolocation();
@@ -134,4 +155,4 @@ const mapOnClick: (e: MapBrowserEvent) => void = manageMapOnClick(overlay);
 
 map.on("click", (e: MapBrowserEvent): void => mapOnClick(e));
 
-map.on('pointermove', (e: MapBrowserEvent): string => map.getTargetElement().style.cursor = (map.hasFeatureAtPixel(e.pixel) ? "pointer" : "inherit"));
+map.on("pointermove", (e: MapBrowserEvent): string => map.getTargetElement().style.cursor = (map.hasFeatureAtPixel(e.pixel) ? "pointer" : "inherit"));
