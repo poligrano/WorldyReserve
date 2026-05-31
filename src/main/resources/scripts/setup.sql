@@ -376,10 +376,11 @@ BEGIN
     WHERE   u.id = v_id;
 END//
 
-CREATE PROCEDURE GET_USER_DISPLAY_NAME(v_id TYPE OF users.id, OUT v_display_name VARCHAR(61))
+CREATE PROCEDURE GET_USER_DISPLAY_NAME(v_id TYPE OF users.id, OUT v_name TYPE OF users.name, OUT v_surname TYPE OF users.surname, OUT v_email TYPE OF users_email.email)
 BEGIN
-    SELECT  CONCAT(u.name, ' ', u.surname) INTO v_display_name
+    SELECT  u.name, u.surname, ue.email INTO v_name, v_surname, v_email
     FROM    users AS u
+            INNER JOIN users_email AS ue ON u.email = ue.id
     WHERE   u.id = v_id;
 END//
 

@@ -28,8 +28,22 @@
     </div>
     <form action="signin" method="post" enctype="multipart/form-data">
         <div class="form-group">
-            <label for="pfp">Foto Profilo</label>
-            <input id="pfp" type="file" name="pfp" accept="image/jpeg, image/png" onchange="Utils.pfpOnChange(${DBConnection.MAX_PFP_SIZE})" />
+            <label for="avatarImg">Foto Profilo</label>
+            <div class="avatar-row">
+                <div class="avatar-wrap">
+                    <div class="avatar" id="avatarPreview">
+                        <img id="avatarImg" src="pfp/default.jpg" alt="!" style="display: block" />
+                    </div>
+                    <div class="avatar-edit-btn" id="pfpChangePencil" title="Cambia foto">✎</div>
+                </div>
+                <div class="avatar-info">
+                    <p>JPG, PNG o GIF · max 65 KB</p>
+                    <button class="avatar-upload-btn" type="button" id="pfpChange">
+                        &#8593; Carica immagine
+                    </button>
+                    <input type="file" id="photoInput" name="pfp" accept="image/jpeg, image/png" style="display: none" />
+                </div>
+            </div>
         </div>
         <div class="form-group">
             <label for="name">Nome</label>
@@ -60,3 +74,6 @@
 </body>
 </html>
 <script src="ts/dist/Utils.js"></script>
+<script>
+    Utils.initAvatar(${DBConnection.MAX_PFP_SIZE});
+</script>

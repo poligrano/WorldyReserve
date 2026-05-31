@@ -2,6 +2,7 @@ package edu.fauser.tpsit.progettotpsit.obj;
 
 import edu.fauser.tpsit.progettotpsit.entity.Comment;
 import edu.fauser.tpsit.progettotpsit.entity.POIMeta;
+import edu.fauser.tpsit.progettotpsit.entity.User;
 import edu.fauser.tpsit.progettotpsit.entity.UserPOIMeta;
 import edu.fauser.tpsit.progettotpsit.helper.HashHelper;
 import edu.fauser.tpsit.progettotpsit.singleton.EnvVar;
@@ -48,12 +49,19 @@ public class DBConnection implements AutoCloseable
     }
     public String retrieveUserName(long uid) throws SQLException
     {
-        try (CallableStatement stmt = con.prepareCall("{CALL GET_USER_DISPLAY_NAME(?, ?)}"))
+        User u = retrieveUser(uid);
+        return u.name() + " " + u.surname();
+    }
+    public User retrieveUser(long uid) throws SQLException
+    {
+        try (CallableStatement stmt = con.prepareCall("{CALL GET_USER_DISPLAY_NAME(?, ?, ?, ?)}"))
         {
             stmt.setLong(1, uid);
             stmt.registerOutParameter(2, Types.VARCHAR);
+            stmt.registerOutParameter(3, Types.VARCHAR);
+            stmt.registerOutParameter(4, Types.VARCHAR);
             stmt.execute();
-            return stmt.getString(2);
+            return new User(stmt.getString(2), stmt.getString(3), stmt.getString(4));
         }
     }
     public String retrieveEmail(long uid) throws SQLException
@@ -81,6 +89,22 @@ public class DBConnection implements AutoCloseable
             stmt.registerOutParameter(6, Types.CHAR);
             stmt.execute();
             return stmt.getString(6);
+        }
+    }
+    public void updateUser(long uid, String name, String surname, Part pfp) throws SQLException, IOException
+    {
+        try (PreparedStatement stmt = con.prepareCall("UPDATE users SET name = " + (name == null ? "name" : "?") + ", surname = " + (surname == null ? "surname" : "?") + ", pfp = " + (pfp.getSize() == 0 ? "pfp" : "?") + " WHERE id = ?"))
+        {
+            int current = 1;
+            if (name != null)
+                stmt.setString(current++, name);
+            if (surname != null)
+                stmt.setString(current++, surname);
+            if (pfp.getSize() != 0)
+                stmt.setBlob(current++, pfp.getInputStream());
+            stmt.setLong(current, uid);
+            if (current > 1)
+                stmt.execute();
         }
     }
     public long insertGoogleUser(String name, String surname, InputStream pfp, String email, String gid) throws SQLException

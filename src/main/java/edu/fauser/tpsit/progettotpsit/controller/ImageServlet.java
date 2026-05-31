@@ -53,23 +53,28 @@ public class ImageServlet extends HttpServlet
     }
     private void sendImage(HttpServletRequest request, HttpServletResponse response, long id)
     {
-        try (InputStream is = getPfp(con.getUserPfp(id)))
+        try
         {
-            byte[] pfp = is.readAllBytes();
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("image/*");
-            response.setContentLength(pfp.length);
-            response.getOutputStream().write(pfp);
-            response.flushBuffer();
+            Blob b;
+            if ((b = con.getUserPfp(id)) == null)
+                response.sendRedirect("pfp/default.jpg");
+            else
+            {
+                try (InputStream is = b.getBinaryStream())
+                {
+                    byte[] pfp = is.readAllBytes();
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.setContentType("image/*");
+                    response.setContentLength(pfp.length);
+                    response.getOutputStream().write(pfp);
+                    response.flushBuffer();
+                }
+            }
         }
         catch (SQLException | IOException e)
         {
             log(e.getMessage(), e);
             ServletHelper.restRespond(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore del Server!", getServletContext());
         }
-    }
-    private InputStream getPfp(Blob pfp) throws SQLException
-    {
-        return (pfp == null ? getClass().getClassLoader().getResourceAsStream("pfp/default.jpg") : pfp.getBinaryStream());
     }
 }

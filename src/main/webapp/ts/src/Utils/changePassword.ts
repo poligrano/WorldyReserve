@@ -1,4 +1,4 @@
-import {init_error} from "./generic_error";
+import {initError} from "./genericError";
 
 const emailElement: HTMLInputElement = document.getElementById("email") as HTMLInputElement;
 const sendButtonElement: HTMLInputElement = document.getElementById("send") as HTMLInputElement;
@@ -7,7 +7,7 @@ const timerElement: HTMLElement = document.getElementById("timer")!;
 export async function sendCodeEvent(URI: string, delay: number): Promise<void>
 {
     let resp: Response = await fetch(URI + "?email=" + emailElement.value);
-    init_error(await resp.text());
+    initError(await resp.text());
     if (resp.ok)
         timeoutSend(delay);
 }

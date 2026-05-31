@@ -1,0 +1,30 @@
+<svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <rect width="900" height="600" fill="#1c1209"/>
+    <polygon points="0,0 360,0 348,90 315,135 280,200 225,225 180,200 90,245 0,225" fill="#261a0e" stroke="#4a3420" stroke-width="1"/>
+    <polygon points="360,0 900,0 900,170 810,158 765,202 697,180 630,225 540,202 472,158 405,113 348,90" fill="#2a1c0f" stroke="#4a3420" stroke-width="1"/>
+    <polygon points="0,225 90,245 180,200 225,225 248,315 202,382 135,428 45,405 0,360" fill="#231610" stroke="#4a3420" stroke-width="1"/>
+    <polygon points="225,225 280,200 315,135 360,113 472,158 518,225 495,315 450,382 382,405 315,382 259,338" fill="#2e2010" stroke="#4a3420" stroke-width="1"/>
+    <polygon points="540,202 630,225 697,180 765,202 810,158 900,170 900,360 832,338 765,382 697,405 630,360 562,338 518,292 518,225" fill="#281b0d" stroke="#4a3420" stroke-width="1"/>
+    <polygon points="0,360 45,405 135,428 202,382 248,428 225,518 157,562 67,585 0,562" fill="#261a0d" stroke="#4a3420" stroke-width="1"/>
+    <polygon points="382,405 450,382 495,428 472,518 405,562 337,540 292,472 315,428" fill="#2c1e0f" stroke="#4a3420" stroke-width="1"/>
+    <polygon points="630,360 697,405 765,382 832,428 855,518 787,562 697,540 630,495 585,428 562,338" fill="#271a0e" stroke="#4a3420" stroke-width="1"/>
+    <path d="M0,225 Q112,236 225,225 Q348,213 472,225 Q596,236 720,225 Q810,219 900,225" fill="none" stroke="#5a3e22" stroke-width="2.5" opacity="0.65"/>
+    <path d="M0,450 Q170,439 315,450 Q450,461 585,450 Q742,439 900,450" fill="none" stroke="#5a3e22" stroke-width="2" opacity="0.55"/>
+    <path d="M225,0 Q219,135 225,225 Q231,382 225,450 Q219,540 225,600" fill="none" stroke="#5a3e22" stroke-width="2.5" opacity="0.65"/>
+    <path d="M562,0 Q556,170 562,315 Q568,450 562,600" fill="none" stroke="#5a3e22" stroke-width="2" opacity="0.55"/>
+    <path d="M0,112 Q180,107 315,135 Q405,158 518,112 Q652,68 900,90" fill="none" stroke="#402c18" stroke-width="1.2" opacity="0.75"/>
+    <path d="M0,338 Q225,349 382,338 Q562,326 720,349 Q810,360 900,338" fill="none" stroke="#402c18" stroke-width="1.2" opacity="0.65"/>
+    <path d="M112,0 Q122,225 112,450 Q103,562 112,600" fill="none" stroke="#402c18" stroke-width="1.2" opacity="0.75"/>
+    <path d="M730,0 Q740,225 730,450 Q720,562 730,600" fill="none" stroke="#402c18" stroke-width="1.2" opacity="0.65"/>
+    <ellipse cx="180" cy="168" rx="90" ry="56" fill="none" stroke="#3d2c18" stroke-width="0.8" opacity="0.5"/>
+    <ellipse cx="180" cy="168" rx="62" ry="36" fill="none" stroke="#3d2c18" stroke-width="0.8" opacity="0.4"/>
+    <ellipse cx="652" cy="270" rx="100" ry="62" fill="none" stroke="#3d2c18" stroke-width="0.8" opacity="0.5"/>
+    <ellipse cx="652" cy="270" rx="68" ry="40" fill="none" stroke="#3d2c18" stroke-width="0.8" opacity="0.4"/>
+    <ellipse cx="360" cy="490" rx="78" ry="50" fill="none" stroke="#3d2c18" stroke-width="0.8" opacity="0.45"/>
+    <circle cx="225" cy="225" r="5" fill="#c87941" opacity="0.65"/>
+    <circle cx="225" cy="225" r="10" fill="none" stroke="#c87941" stroke-width="1" opacity="0.3"/>
+    <circle cx="562" cy="315" r="5" fill="#c87941" opacity="0.5"/>
+    <circle cx="562" cy="315" r="10" fill="none" stroke="#c87941" stroke-width="1" opacity="0.25"/>
+    <circle cx="360" cy="490" r="4" fill="#c87941" opacity="0.4"/>
+    <circle cx="360" cy="490" r="8" fill="none" stroke="#c87941" stroke-width="1" opacity="0.2"/>
+</svg>

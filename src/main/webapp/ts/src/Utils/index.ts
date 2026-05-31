@@ -1,6 +1,6 @@
-import {init_error} from "./generic_error";
-import {sendCodeEvent} from "./change_password";
-import {pfpOnChange} from "./singin";
+import {initError} from "./genericError";
+import {sendCodeEvent} from "./changePassword";
+import {initAvatar} from "./avatarUpload";
 import {onSubmitCheck} from "./reserve";
 
-export { init_error, sendCodeEvent, pfpOnChange, onSubmitCheck };
+export { initError, sendCodeEvent, initAvatar, onSubmitCheck };
