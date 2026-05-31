@@ -9,9 +9,9 @@ CREATE TABLE users_pass (
 );
 
 CREATE TABLE users_email (
-    id BIGINT UNSIGNED AUTO_INCREMENT,
-    email VARCHAR(254) NOT NULL UNIQUE,
-    PRIMARY KEY (id)
+     id BIGINT UNSIGNED AUTO_INCREMENT,
+     email VARCHAR(254) NOT NULL UNIQUE,
+     PRIMARY KEY (id)
 );
 
 CREATE TABLE users (
@@ -24,11 +24,11 @@ CREATE TABLE users (
     pass BIGINT UNSIGNED UNIQUE,
     PRIMARY KEY (id),
     FOREIGN KEY (email) REFERENCES users_email(id)
-        ON DELETE CASCADE
-        ON UPDATE RESTRICT,
+       ON DELETE CASCADE
+       ON UPDATE RESTRICT,
     FOREIGN KEY (pass) REFERENCES users_pass(id)
-        ON DELETE SET NULL
-        ON UPDATE RESTRICT
+       ON DELETE SET NULL
+       ON UPDATE RESTRICT
 );
 
 CREATE UNIQUE INDEX google_id ON users(gid);
@@ -39,18 +39,98 @@ CREATE TABLE users_verify (
     expiration TIMESTAMP NOT NULL DEFAULT (NOW() + INTERVAL 20 MINUTE),
     PRIMARY KEY (id),
     FOREIGN KEY (id) REFERENCES users(id)
-        ON DELETE CASCADE
-        ON UPDATE RESTRICT
+      ON DELETE CASCADE
+      ON UPDATE RESTRICT
 );
 
 CREATE UNIQUE INDEX confirm_code ON users_verify(code);
 
-CREATE EVENT purge_non_verified
-ON SCHEDULE EVERY 10 MINUTE
-DO
+
+CREATE TABLE users_pass_change (
+    id BIGINT UNSIGNED,
+    code CHAR(8) NOT NULL,
+    expiration TIMESTAMP DEFAULT (NOW() + INTERVAL 5 MINUTE),
+    PRIMARY KEY (id),
+    FOREIGN KEY (id) REFERENCES users_pass(id)
+       ON DELETE CASCADE
+       ON UPDATE RESTRICT
+);
+
+
+CREATE TABLE users_poi (
+    user_id BIGINT UNSIGNED,
+    osm_id BIGINT UNSIGNED,
+    does_like BOOL NOT NULL DEFAULT FALSE,
+    favourite BOOL NOT NULL DEFAULT FALSE,
+    last_interacted TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, osm_id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+       ON DELETE CASCADE
+       ON UPDATE RESTRICT
+);
+
+CREATE TABLE users_poi_comment (
+    id TINYINT UNSIGNED AUTO_INCREMENT,
+    user_id BIGINT UNSIGNED NOT NULL,
+    osm_id BIGINT UNSIGNED NOT NULL,
+    comment VARCHAR(255) NOT NULL,
+    when_posted DATE NOT NULL DEFAULT CURDATE(),
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+       ON DELETE CASCADE
+       ON UPDATE RESTRICT
+);
+
+CREATE TABLE users_reserve_poi (
+    id BIGINT UNSIGNED AUTO_INCREMENT,
+    user_id BIGINT UNSIGNED,
+    osm_id BIGINT UNSIGNED,
+    start DATE NOT NULL,
+    end DATE NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+       ON DELETE CASCADE
+       ON UPDATE RESTRICT
+);
+
+DELIMITER //
+
+CREATE EVENT purge_unused_code
+    ON SCHEDULE EVERY 1 DAY
+    DO
+    CALL purge_unused_code()//
+
+CREATE PROCEDURE purge_unused_code()
 BEGIN
-    CALL purge_non_verified();
-END;
+    DELETE FROM users_pass_change
+    WHERE   expiration < NOW();
+END//
+
+CREATE TRIGGER check_reservation
+    BEFORE INSERT
+    ON users_reserve_poi FOR EACH ROW
+BEGIN
+    IF  NEW.start < CURDATE()
+        OR NEW.end < NEW.start
+        OR NEW.start <= (
+            SELECT  urp.end
+            FROM    users_reserve_poi AS urp
+            WHERE   urp.osm_id = NEW.osm_id
+                    AND urp.user_id = NEW.user_id
+            ORDER BY    urp.end DESC
+            LIMIT 1
+        ) THEN
+        SIGNAL SQLSTATE "45000"
+            SET MESSAGE_TEXT = "Invalid reservation";
+    END IF;
+END//
+
+CREATE EVENT purge_non_verified
+    ON SCHEDULE EVERY 10 MINUTE
+    DO
+    BEGIN
+        CALL purge_non_verified();
+    END//
 
 CREATE PROCEDURE purge_non_verified()
 BEGIN
@@ -70,83 +150,7 @@ BEGIN
     DELETE FROM users_verify
     WHERE   expiration < v_now;
     COMMIT;
-END;
-
-CREATE TABLE users_pass_change (
-    id BIGINT UNSIGNED,
-    code CHAR(8) NOT NULL,
-    expiration TIMESTAMP DEFAULT (NOW() + INTERVAL 5 MINUTE),
-    PRIMARY KEY (id),
-    FOREIGN KEY (id) REFERENCES users_pass(id)
-        ON DELETE CASCADE
-        ON UPDATE RESTRICT
-);
-
-CREATE EVENT purge_unused_code
-    ON SCHEDULE EVERY 1 DAY
-    DO
-    CALL purge_unused_code();
-
-CREATE PROCEDURE purge_unused_code()
-BEGIN
-    DELETE FROM users_pass_change
-    WHERE   expiration < NOW();
-END;
-
-CREATE TABLE users_poi (
-    user_id BIGINT UNSIGNED,
-    osm_id BIGINT UNSIGNED,
-    does_like BOOL NOT NULL DEFAULT FALSE,
-    favourite BOOL NOT NULL DEFAULT FALSE,
-    last_interacted TIMESTAMP NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (user_id, osm_id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE
-        ON UPDATE RESTRICT
-);
-
-CREATE TABLE users_poi_comment (
-    id TINYINT UNSIGNED AUTO_INCREMENT,
-    user_id BIGINT UNSIGNED NOT NULL,
-    osm_id BIGINT UNSIGNED NOT NULL,
-    comment VARCHAR(255) NOT NULL,
-    when_posted DATE NOT NULL DEFAULT CURDATE(),
-    PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE
-        ON UPDATE RESTRICT
-);
-
-CREATE TABLE users_reserve_poi (
-    id BIGINT UNSIGNED AUTO_INCREMENT,
-    user_id BIGINT UNSIGNED,
-    osm_id BIGINT UNSIGNED,
-    start DATE NOT NULL,
-    end DATE NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE
-        ON UPDATE RESTRICT
-);
-
-CREATE TRIGGER check_reservation
-BEFORE INSERT
-ON users_reserve_poi FOR EACH ROW
-BEGIN
-    IF  NEW.start < CURDATE()
-        OR NEW.end < NEW.start
-        OR NEW.start <= (
-                SELECT  urp.end
-                FROM    users_reserve_poi AS urp
-                WHERE   urp.osm_id = NEW.osm_id
-                        AND urp.user_id = NEW.user_id
-                ORDER BY    urp.end DESC
-                LIMIT 1
-            ) THEN
-        SIGNAL SQLSTATE "45000"
-        SET MESSAGE_TEXT = "Invalid reservation";
-    END IF;
-END;
+END//
 
 CREATE PROCEDURE INSERT_NORMAL_USER(v_name TYPE OF users.name, v_surname TYPE OF users.surname, v_pfp TYPE OF users.pfp, v_email TYPE OF users_email.email, v_pass TYPE OF users_pass.pass, OUT v_code CHAR(32))
 BEGIN
@@ -172,7 +176,7 @@ BEGIN
     INSERT INTO users_verify(id, code)
     VALUES (v_user_id, UNHEX(v_code));
     COMMIT;
-END;
+END//
 
 CREATE PROCEDURE INSERT_GOOGLE_USER(v_name TYPE OF users.name, v_surname TYPE OF users.surname, v_pfp TYPE OF users.pfp, v_email TYPE OF users_email.email, v_gid TYPE OF users.gid, OUT v_id TYPE OF users.id)
 BEGIN
@@ -190,7 +194,7 @@ BEGIN
     VALUES (v_name, v_surname, v_pfp, v_email_id, v_gid);
     SET v_id = LAST_INSERT_ID();
     COMMIT;
-END;
+END//
 
 CREATE PROCEDURE GET_NORMAL_USER_INFO(v_email TYPE OF users_email.email, OUT v_pass TYPE OF users_pass.pass, OUT v_id TYPE OF users.id)
 BEGIN
@@ -201,18 +205,18 @@ BEGIN
     WHERE   u.gid IS NULL
             AND ue.email = v_email
             AND u.id NOT IN
-            (
-                SELECT  uv.id
-                FROM    users_verify AS uv
-            );
-END;
+              (
+                  SELECT  uv.id
+                  FROM    users_verify AS uv
+              );
+END//
 
 CREATE PROCEDURE GET_GOOGLE_USER_INFO(v_gid TYPE OF users.gid, OUT v_id TYPE OF users.id)
 BEGIN
     SELECT  u.id INTO v_id
     FROM    users AS u
     WHERE   u.gid = v_gid;
-END;
+END//
 
 CREATE PROCEDURE VERIFY_USER(v_code CHAR(32), v_now TIMESTAMP, OUT v_sc TINYINT)
 BEGIN
@@ -235,13 +239,13 @@ BEGIN
             SET v_sc = -1;
         ELSE
             BEGIN
-            DELETE FROM users_verify
-            WHERE   code = v_byte_code;
-            SET v_sc = 1;
+                DELETE FROM users_verify
+                WHERE   code = v_byte_code;
+                SET v_sc = 1;
             END;
-    END CASE;
+        END CASE;
     COMMIT;
-END;
+END//
 
 CREATE PROCEDURE SET_CHANGE_PASS_CODE(v_email TYPE OF users_email.email, v_code TYPE OF users_pass_change.code)
 BEGIN
@@ -258,15 +262,15 @@ BEGIN
             INNER JOIN users_pass up ON u.pass = up.id
     WHERE   ue.email = v_email
             AND u.id NOT IN
-                (
-                    SELECT  uv.id
-                    FROM    users_verify AS uv
-                );
+              (
+                  SELECT  uv.id
+                  FROM    users_verify AS uv
+              );
     INSERT INTO users_pass_change(id, code)
     VALUES  (v_upid, v_code)
     ON DUPLICATE KEY UPDATE code = v_code, expiration = (NOW() + INTERVAL 5 MINUTE);
     COMMIT;
-END;
+END//
 
 CREATE PROCEDURE CHANGE_PASS(v_email TYPE OF users_email.email, v_now TIMESTAMP, v_code TYPE OF users_pass_change.code, v_pass TYPE OF users_pass.pass, OUT v_sc TINYINT)
 BEGIN
@@ -286,7 +290,7 @@ BEGIN
     SELECT  upc.expiration INTO v_exp
     FROM    users_pass_change AS upc
     WHERE   upc.id = v_upid
-            AND upc.code = v_code;
+      AND upc.code = v_code;
     CASE
         WHEN v_exp IS NULL THEN
             SET v_sc = 0;
@@ -301,9 +305,9 @@ BEGIN
                 WHERE   id = v_upid;
                 SET v_sc = 1;
             END;
-    END CASE;
+        END CASE;
     COMMIT;
-END;
+END//
 
 CREATE PROCEDURE GET_USER_PFP(v_id TYPE OF users.id, OUT v_pfp TYPE OF users.pfp)
 BEGIN
@@ -315,54 +319,54 @@ BEGIN
                   SELECT  uv.id
                   FROM    users_verify AS uv
               );
-END;
+END//
 
 CREATE PROCEDURE GET_USER_POI_META(v_id TYPE OF users.id, v_osm_id TYPE OF users_poi.osm_id, OUT v_does_like TYPE OF users_poi.does_like, OUT v_favourite TYPE OF users_poi.favourite, OUT v_reserved BOOL)
 BEGIN
     SELECT  up.does_like, up.favourite INTO v_does_like, v_favourite
     FROM    users_poi AS up
     WHERE   up.user_id = v_id
-            AND up.osm_id = v_osm_id;
+      AND up.osm_id = v_osm_id;
     SET v_reserved = CURDATE() < ANY (
-            SELECT  urp.end
-            FROM    users_reserve_poi AS urp
-            WHERE   urp.user_id = v_id
-                    AND urp.osm_id = v_osm_id
-        );
-END;
+        SELECT  urp.end
+        FROM    users_reserve_poi AS urp
+        WHERE   urp.user_id = v_id
+                AND urp.osm_id = v_osm_id
+    );
+END//
 
 CREATE PROCEDURE GET_POI_META(v_osm_id TYPE OF users_poi.osm_id, OUT v_like_number BIGINT UNSIGNED)
 BEGIN
     SELECT  COUNT(up.does_like = TRUE) INTO v_like_number
     FROM    users_poi AS up
     WHERE   up.osm_id = v_osm_id;
-END;
+END//
 
 CREATE PROCEDURE CHANGE_USER_POI_REL(v_osm_id TYPE OF users_poi.osm_id, v_id TYPE OF users.id, v_does_like TYPE OF users_poi.does_like, v_favourite TYPE OF users_poi.favourite)
 BEGIN
-   INSERT INTO users_poi(user_id, osm_id, does_like, favourite)
-   VALUES (v_id, v_osm_id, v_does_like, v_favourite)
-   ON DUPLICATE KEY UPDATE does_like = v_does_like, favourite = v_favourite, last_interacted = NOW();
-END;
+    INSERT INTO users_poi(user_id, osm_id, does_like, favourite)
+    VALUES (v_id, v_osm_id, v_does_like, v_favourite)
+    ON DUPLICATE KEY UPDATE does_like = v_does_like, favourite = v_favourite, last_interacted = NOW();
+END//
 
 CREATE PROCEDURE POST_COMMENT(v_osm_id TYPE OF users_poi.osm_id, v_id TYPE OF users.id, v_comment TYPE OF users_poi_comment.comment)
 BEGIN
     INSERT INTO users_poi_comment(user_id, osm_id, comment)
     VALUES (v_id, v_osm_id, v_comment);
-END;
+END//
 
 CREATE PROCEDURE RESERVE_POI(v_osm_id TYPE OF users_reserve_poi.osm_id, v_id TYPE OF users.id, v_start TYPE OF users_reserve_poi.start, v_end TYPE OF users_reserve_poi.end, OUT v_reservation_id TYPE OF users_reserve_poi.id)
 BEGIN
     INSERT INTO users_reserve_poi(user_id, osm_id, start, end)
     VALUES (v_id, v_osm_id, v_start, v_end);
     SET v_reservation_id = LAST_INSERT_ID();
-END;
+END//
 
 CREATE PROCEDURE DELETE_RESERVATION(v_id TYPE OF users_reserve_poi.id)
 BEGIN
     DELETE FROM users_reserve_poi
     WHERE id = v_id;
-END;
+END//
 
 CREATE PROCEDURE GET_USER_MAIL(v_id TYPE OF users.id, OUT v_email TYPE OF users_email.email)
 BEGIN
@@ -370,11 +374,13 @@ BEGIN
     FROM    users AS u
             INNER JOIN users_email AS ue ON u.email = ue.id
     WHERE   u.id = v_id;
-END;
+END//
 
-CREATE PROCEDURE GET_USER_DISPLAY_NAME(v_id TYPE OF users.id, OUT v_display_name VARCHAR(60))
+CREATE PROCEDURE GET_USER_DISPLAY_NAME(v_id TYPE OF users.id, OUT v_display_name VARCHAR(61))
 BEGIN
     SELECT  CONCAT(u.name, ' ', u.surname) INTO v_display_name
     FROM    users AS u
     WHERE   u.id = v_id;
-END;
+END//
+
+DELIMITER ;

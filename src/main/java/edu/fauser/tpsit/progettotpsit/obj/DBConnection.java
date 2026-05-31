@@ -239,6 +239,21 @@ public class DBConnection implements AutoCloseable
             stmt.execute();
         }
     }
+    public ArrayList<Long> getUserSaved(long userId) throws SQLException
+    {
+        try (PreparedStatement stmt = con.prepareCall("SELECT up.osm_id FROM users_poi AS up WHERE up.user_id = ? AND up.favourite = TRUE"))
+        {
+            stmt.setLong(1, userId);
+            return buildIdsArray(stmt.executeQuery());
+        }
+    }
+    private ArrayList<Long> buildIdsArray(ResultSet res) throws SQLException
+    {
+        ArrayList<Long> arr = new ArrayList<>();
+        while (res.next())
+            arr.add(res.getLong(1));
+        return arr;
+    }
     @Override
     public void close() throws SQLException
     {

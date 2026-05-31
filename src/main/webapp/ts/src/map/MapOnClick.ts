@@ -3,13 +3,15 @@ import {FeatureLike} from "ol/Feature";
 import {Utils} from "./Utils";
 import {fromLonLat} from "ol/proj";
 import notifyError = Utils.notifyError;
-import {UserName} from "./index";
+import {fav, map, UserName} from "./index";
 import getCurrentDateStr = Utils.getCurrentDateStr;
 
 type PopUpState = { status: "idle" } | { status: "loaded", unload: Function, loaded: Feature };
 
 async function loadNominatim(poi: any): Promise<any | null>
 {
+    if (fav.getFavourite(poi.id) !== undefined)
+        return fav.getFavourite(poi.id);
     if (poi.nominatim === undefined)
         return await Utils.queryReverseNominatim([poi.lat, poi.lon]);
     return null;
@@ -101,6 +103,10 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
             const poi: any = state.loaded.getProperties();
             poi.embedded_meta.favourite = !poi.embedded_meta.favourite;
             state.loaded.setProperties(poi);
+            if (poi.embedded_meta.favourite)
+                fav.addFavourites(poi.nominatim);
+            else
+                fav.removeFavourite(poi.id);
             renderFavourite(poi.embedded_meta.favourite);
         }
     }

@@ -11,6 +11,7 @@ import {Utils} from "./Utils";
 import {manageMapOnMove} from "./MapOnMove";
 import {manageMapOnClick} from "./MapOnClick";
 import {Circle} from "ol/geom";
+import {FavouriteManager} from "./FavouriteManager";
 
 export const UserName: string = document.getElementById("username")!.textContent;
 
@@ -36,7 +37,7 @@ function initSearchBarEvents(): void
     {
         const elem: HTMLButtonElement = document.createElement("button");
         elem.className = "dropdown-item";
-        elem.textContent = `${found.display_name}`;
+        elem.textContent = found.display_name;
         elem.onclick = (): void =>
         {
             map.getView().animate({ center: fromLonLat([found.lon, found.lat]), zoom: 15, duration: 600 });
@@ -53,7 +54,7 @@ function initSearchBarEvents(): void
             {
                 controller?.abort();
                 controller = new AbortController();
-                searchDropDownElem.replaceChildren(...(await Utils.querySearchNominatim(search, controller.signal)).map((f) => createFoundElem(f)));
+                searchDropDownElem.replaceChildren(...(await Utils.querySearchNominatim(search, controller.signal)).map((f: any): HTMLButtonElement => createFoundElem(f)));
                 searchDropDownElem.classList.add("open");
             }
         }
@@ -61,6 +62,8 @@ function initSearchBarEvents(): void
     const searchEvent: () => Promise<void> = lastSearchEvent();
     searchBarElem.onkeydown = Utils.debounce(() => searchEvent(), 400);
 }
+
+export const fav: FavouriteManager = new FavouriteManager();
 
 initDropDownMenuEvents();
 initSearchBarEvents();

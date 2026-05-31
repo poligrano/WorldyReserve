@@ -1,4 +1,5 @@
-<jsp:useBean id="name" scope="request" type="java.lang.String"/>
+<jsp:useBean id="name" scope="request" type="java.lang.String" />
+<jsp:useBean id="saved" scope="request" type="java.util.ArrayList" />
 <%@ page contentType="text/html;charset=UTF-8" session="false"  %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <c:if test='${pageContext.request.getSession(false) == null || pageContext.request.getSession(false).getAttribute("uid") == null}'>
@@ -47,10 +48,6 @@
             <div class="dropdown" id="hotels-dropdown">
                 <span class="dropdown-label">Hotel Salvati</span>
                 <div class="dropdown-divider"></div>
-                <button class="dropdown-item" onclick="selectHotel('Grand Hotel Torino')">Grand Hotel Torino</button>
-                <button class="dropdown-item" onclick="selectHotel('Hotel Roma')">Hotel Roma</button>
-                <button class="dropdown-item" onclick="selectHotel('Mole Antonelliana Suites')">Mole Antonelliana Suites</button>
-                <button class="dropdown-item" onclick="selectHotel('Hotel Principi di Piemonte')">Hotel Principi di Piemonte</button>
             </div>
         </div>
         <div class="dropdown-wrap">
@@ -138,3 +135,10 @@
 </body>
 </html>
 <script src="ts/dist/map.js"></script>
+<script>
+    map.fav.addFromIds(
+        <c:forEach var="id" items="${saved}">
+            ${id},
+        </c:forEach>
+    );
+</script>

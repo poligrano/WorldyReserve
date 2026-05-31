@@ -1,5 +1,7 @@
 import {Extent} from "ol/extent";
 import {Coordinate} from "ol/coordinate";
+import {fromLonLat} from "ol/proj";
+import {map} from "./index";
 
 export namespace Utils
 {
@@ -79,20 +81,31 @@ export namespace Utils
     export async function querySearchNominatim(search: string, signal: AbortSignal | null = null): Promise<Array<any>>
     {
         console.log("Querying Nominatim Search", search);
-        return Promise.all([fetch(`https://nominatim.openstreetmap.org/search?q=hotel ${search}&format=json&limit=5`, {
+        return Promise.all([fetch(`https://nominatim.openstreetmap.org/search?q=hotel ${encodeURIComponent(search)}&format=json&limit=5`, {
             signal: signal,
             method: "GET",
             headers: {
                 "User-Agent": navigator.userAgent
             }
         }).then((r: Response) => r.json()),
-            fetch(`https://nominatim.openstreetmap.org/search?q=${search}&format=json&featureType=city&limit=3`, {
+            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(search)}&format=json&featureType=city&limit=3`, {
                 signal: signal,
                 method: "GET",
                 headers: {
                     "User-Agent": navigator.userAgent
                 }
             }).then((r: Response) => r.json())]).then((r: [any, any]) => [...r[0], ...r[1]]);
+    }
+    export async function queryByIdNominatim(id: number, signal: AbortSignal | null = null): Promise<any>
+    {
+        console.log("Querying Nominatim By Id", id);
+        return fetch(`https://nominatim.openstreetmap.org/lookup?osm_ids=N${encodeURIComponent(id)}&format=json`, {
+            signal: signal,
+            method: "GET",
+            headers: {
+                "User-Agent": navigator.userAgent
+            }
+        }).then((r) => r.json());
     }
     function initNotifyError(): (mx: string, duration: number) => void
     {
