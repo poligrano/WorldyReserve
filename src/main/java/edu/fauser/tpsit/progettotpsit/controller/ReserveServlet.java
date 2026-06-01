@@ -51,7 +51,7 @@ public class ReserveServlet extends HttpServlet
         {
             if (ServletHelper.checkParams(request, "id"))
             {
-                con.deleteReservation(Long.parseLong(request.getParameter("id")));
+                con.deleteReservation(Long.parseLong(request.getParameter("id")), (Long) request.getSession().getAttribute("uid"));
                 ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_OK, "Cancellata", "Prenotazione cancellata", "Prenotazione cancellata con successo");
             }
             else

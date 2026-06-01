@@ -255,11 +255,12 @@ public class DBConnection implements AutoCloseable
             return stmt.getLong(5);
         }
     }
-    public void deleteReservation(long id) throws SQLException
+    public void deleteReservation(long id, long uid) throws SQLException
     {
-        try (CallableStatement stmt = con.prepareCall("{CALL DELETE_RESERVATION(?)}"))
+        try (CallableStatement stmt = con.prepareCall("{CALL DELETE_RESERVATION(?, ?)}"))
         {
             stmt.setLong(1, id);
+            stmt.setLong(2, uid);
             stmt.execute();
         }
     }

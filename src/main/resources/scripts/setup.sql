@@ -363,10 +363,11 @@ BEGIN
     SET v_reservation_id = LAST_INSERT_ID();
 END//
 
-CREATE PROCEDURE DELETE_RESERVATION(v_id TYPE OF users_reserve_poi.id)
+CREATE PROCEDURE DELETE_RESERVATION(v_id TYPE OF users_reserve_poi.id, v_user_id TYPE OF users.id)
 BEGIN
     DELETE FROM users_reserve_poi
-    WHERE id = v_id;
+    WHERE   id = v_id
+            AND user_id = v_user_id;
 END//
 
 CREATE PROCEDURE GET_USER_MAIL(v_id TYPE OF users.id, OUT v_email TYPE OF users_email.email)
