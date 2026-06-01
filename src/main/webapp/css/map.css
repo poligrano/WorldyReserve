@@ -564,21 +564,30 @@ header {
         width: 140px;
     }
 
+    .ol-overlay-container .hotel-popup,
     .hotel-popup {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        border-radius: 18px 18px 0 0;
-        border-bottom: none;
-        max-height: 80vh;
-        overflow-y: auto;
-        z-index: 1000;
+        display: none;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: auto !important;
+        width: 100% !important;
+        max-height: 75vh !important;
+        transform: none !important;
+        border-radius: 18px 18px 0 0 !important;
+        border-bottom: none !important;
+        overflow: hidden !important;
+        z-index: 1000 !important;
     }
 
     .hotel-popup::after {
-        display: none;
+        display: none !important;
+    }
+
+    .popup-body {
+        overflow-y: auto !important;
+        max-height: calc(75vh - 120px - 60px) !important;
     }
 
     .icon-btn {

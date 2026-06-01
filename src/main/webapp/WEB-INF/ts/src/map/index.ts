@@ -102,8 +102,11 @@ const layer: VectorLayer = new VectorLayer({
     })
 });
 
+if (Utils.isMobile())
+    document.body.append(document.getElementById("hotel-popup")!);
+
 const overlay: Overlay = new Overlay({
-    element: document.getElementById("hotel-popup")!,
+    element: (Utils.isMobile() ? undefined : document.getElementById("hotel-popup")!),
     positioning: "bottom-center",
     stopEvent: true,
     offset: [0, -16],

@@ -110,7 +110,10 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
     }
     async function unload(): Promise<void>
     {
-        overlay.setPosition(undefined);
+        if (Utils.isMobile())
+            document.getElementById("hotel-popup")!.style.display = "none";
+        else
+            overlay.setPosition(undefined);
         if (state.status === "loaded")
         {
             const res: string | true = await Utils.queryUpdateMeta(state.loaded.getId() as number, state.loaded.getProperties().embedded_meta.does_like, state.loaded.getProperties().embedded_meta.favourite)
@@ -176,7 +179,10 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
         renderComments([...(poi.embedded_meta.own_comments as Array<any>).reverse(), ...(poi.embedded_meta.poi.comments as Array<any>).reverse()]);
         renderReserved(poi.embedded_meta.reserved);
         popUpReserveAElem.href = `reserve.jsp?id=${encodeURIComponent(poi.id)}&name=${encodeURIComponent(poi.nominatim.name)}`;
-        overlay.setPosition(fromLonLat([poi.lon, poi.lat]));
+        if (Utils.isMobile())
+            document.getElementById("hotel-popup")!.style.display = "block";
+        else
+            overlay.setPosition(fromLonLat([poi.lon, poi.lat]));
     }
     return async (e: MapBrowserEvent): Promise<void> => {
         if (state.status === "loaded")
