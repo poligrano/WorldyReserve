@@ -57,6 +57,8 @@ body::after {
             inset 0 1px 0 rgba(200,121,65,0.12);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    overflow-y: auto;
+    max-height: calc(100vh - 3rem);
     animation: fadeUp 0.45s ease both;
 }
 
