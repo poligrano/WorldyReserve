@@ -41,7 +41,7 @@
     </form>
     <div class="divider">oppure</div>
     <script src="https://accounts.google.com/gsi/client" async></script>
-    <div id="g_id_onload" data-context="signin" data-client_id="${EnvVar.instance().env.get("WEB_CLIENT_ID")}" data-login_uri="ProgettoTPSIT_war_exploded/google"></div>
+    <div id="g_id_onload" data-client_id="${EnvVar.instance().env.get("WEB_CLIENT_ID")}" data-login_uri="ProgettoTPSIT_war_exploded/google"></div>
     <div class="g_id_signin" data-type="standard"></div>
     <p class="register-link">
         Non hai ancora un profilo? <a href="signin.jsp">Registrati</a>

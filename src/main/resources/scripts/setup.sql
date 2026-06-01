@@ -83,8 +83,8 @@ CREATE TABLE users_poi_comment (
 
 CREATE TABLE users_reserve_poi (
     id BIGINT UNSIGNED AUTO_INCREMENT,
-    user_id BIGINT UNSIGNED,
-    osm_id BIGINT UNSIGNED,
+    user_id BIGINT UNSIGNED NOT NULL,
+    osm_id BIGINT UNSIGNED NOT NULL,
     start DATE NOT NULL,
     end DATE NOT NULL,
     PRIMARY KEY (id),
@@ -110,18 +110,18 @@ CREATE TRIGGER check_reservation
     BEFORE INSERT
     ON users_reserve_poi FOR EACH ROW
 BEGIN
+    DECLARE v_last_reserve DATE;
+    SELECT  urp.end INTO v_last_reserve
+    FROM    users_reserve_poi AS urp
+    WHERE   urp.osm_id = NEW.osm_id
+            AND urp.user_id = NEW.user_id
+    ORDER BY    urp.end DESC
+    LIMIT 1;
     IF  NEW.start < CURDATE()
         OR NEW.end < NEW.start
-        OR NEW.start <= (
-            SELECT  urp.end
-            FROM    users_reserve_poi AS urp
-            WHERE   urp.osm_id = NEW.osm_id
-                    AND urp.user_id = NEW.user_id
-            ORDER BY    urp.end DESC
-            LIMIT 1
-        ) THEN
-        SIGNAL SQLSTATE "45000"
-            SET MESSAGE_TEXT = "Invalid reservation";
+        OR v_last_reserve > CURDATE() THEN
+            SIGNAL SQLSTATE "45000"
+                SET MESSAGE_TEXT = "Invalid reservation";
     END IF;
 END//
 
