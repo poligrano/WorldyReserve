@@ -9,7 +9,7 @@ import javax.servlet.annotation.*;
 import java.io.IOException;
 import java.sql.SQLException;
 
-@WebServlet(name = "DemoLoaderServlet", value = "/load")
+@WebServlet(name = "LoaderServlet", value = "/load")
 public class LoaderServlet extends HttpServlet
 {
     private DBConnection con;
