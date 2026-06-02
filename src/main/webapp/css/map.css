@@ -284,6 +284,22 @@ header {
     cursor: default;
 }
 
+.delete-comment-btn {
+    background: none;
+    border: none;
+    color: #A0734A;
+    cursor: pointer;
+    padding: 2px 4px;
+    margin-left: auto;
+    font-size: 12px;
+    opacity: 0.7;
+    transition: opacity 0.15s, color 0.15s;
+}
+.delete-comment-btn:hover {
+    opacity: 1;
+    color: #C0392B;
+}
+
 .hotel-popup::after {
     content: '';
     position: absolute;
@@ -767,4 +783,33 @@ header {
     #comments-list {
         max-height: 130px;
     }
+
+    .nav-panel {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: auto;
+        max-width: none;
+        border-radius: 18px 18px 0 0;
+        border-left: none;
+        border-top: 2px solid #C87941;
+        transform: translateY(100%);
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.6);
+        z-index: 1150;
+    }
+    .nav-panel.open {
+        transform: translateY(0);
+    }
+
+    .nav-close-btn {
+        top: 0.6rem;
+        right: 0.6rem;
+    }
+
+    body.nav-open {
+        overflow: hidden;
+    }
+
 }

@@ -7,8 +7,8 @@ export type RestResult = { ok: boolean, mx: string };
 
 export namespace Utils
 {
-    //const ProjectServerURL = "http://192.168.0.136:8080/ProgettoTPSIT_war_exploded";
-    const ProjectServerURL = "http://localhost:8080/ProgettoTPSIT_war_exploded";
+    const ProjectServerURL = "http://192.168.0.136:8080/ProgettoTPSIT_war_exploded";
+    //const ProjectServerURL = "http://localhost:8080/ProgettoTPSIT_war_exploded";
     export function debounce(callback: Function, timer: number): (...args: any[]) => void
     {
         let t: number;
