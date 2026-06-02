@@ -111,7 +111,7 @@ export namespace Utils
     export async function queryOSRM(w1: Coordinate, w2: Coordinate, type: "car" | "foot" | "bike", signal: AbortSignal | null = null)
     {
         console.log("Querying OSRM", w1, w2, type);
-        return fetch(`http://router.project-osrm.org/route/v1/walk/${encodeURIComponent(w1[0])},${encodeURIComponent(w1[1])};${encodeURIComponent(w2[0])},${encodeURIComponent(w2[1])}?overview=full`, {
+        return fetch(`https://routing.openstreetmap.de/routed-${encodeURIComponent(type)}/route/v1/driving/${encodeURIComponent(w1[0])},${encodeURIComponent(w1[1])};${encodeURIComponent(w2[0])},${encodeURIComponent(w2[1])}?overview=full&geometries=polyline`, {
             signal: signal,
             method: "GET"
         }).then((r) => r.json());

@@ -26,7 +26,7 @@ export class FavouriteManager
         elem.className = "dropdown-item";
         elem.id = `osm_id${saved.osm_id}`;
         elem.textContent = saved.display_name;
-        elem.onclick = () => map.getView().animate({ center: fromLonLat([saved.lon, saved.lat]), zoom: 10, duration: 600 });
+        elem.onclick = () => map.getView().animate({ center: fromLonLat([saved.lon, saved.lat]), zoom: 17, duration: 600 });
         return elem;
     }
     public async addFromIds(...ids: number[]): Promise<void>
