@@ -46,7 +46,7 @@
                 <i class="far fa-bookmark"></i>
             </button>
             <div class="dropdown" id="hotels-dropdown">
-                <span class="dropdown-label">Hotel Salvati</span>
+                <span class="dropdown-label" id="dropdown-saved-label">Nessun hotel salvato</span>
                 <div class="dropdown-divider"></div>
             </div>
         </div>
@@ -119,6 +119,9 @@
     </div>
     <div class="divider"></div>
     <div class="popup-footer">
+        <button class="action-btn" id="goto-btn">
+            <i class="fas fa-arrows"></i> Indicazioni
+        </button>
         <a href="reserve.jsp" class="reserve-btn" id="reserve-btn">
             <i class="fas fa-calendar-check"></i> Prenota
         </a>
@@ -131,6 +134,45 @@
         <line x1="12" y1="16" x2="12.01" y2="16"></line>
     </svg>
     <span id="toast-msg"></span>
+</div>
+<div id="navigation-panel" class="nav-panel">
+    <button class="nav-close-btn" id="nav-close-btn">
+        <i class="fas fa-xmark"></i>
+    </button>
+    <h3 class="nav-title">Percorso</h3>
+    <div class="nav-modes">
+        <input type="radio" id="mode-car" name="travel-mode" value="car" checked />
+        <label for="mode-car" class="mode-label">
+            <i class="fas fa-car"></i> Auto
+        </label>
+        <input type="radio" id="mode-bike" name="travel-mode" value="bike" />
+        <label for="mode-bike" class="mode-label">
+            <i class="fas fa-bicycle"></i> Bici
+        </label>
+        <input type="radio" id="mode-foot" name="travel-mode" value="foot" />
+        <label for="mode-foot" class="mode-label">
+            <i class="fas fa-walking"></i> A piedi
+        </label>
+    </div>
+    <div class="nav-info" id="nav-info">
+        <div class="journey-summary">
+            <div class="summary-row">
+                <i class="fas fa-ruler"></i>
+                <span class="summary-label">Distanza</span>
+                <span class="summary-value" id="summary-distance"></span>
+            </div>
+            <div class="summary-row">
+                <i class="fas fa-clock"></i>
+                <span class="summary-label">Tempo stimato</span>
+                <span class="summary-value" id="summary-eta"></span>
+            </div>
+            <div class="summary-row">
+                <i class="fas fa-route"></i>
+                <span class="summary-label">Arrivo</span>
+                <span class="summary-value" id="summary-arrival-time"></span>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

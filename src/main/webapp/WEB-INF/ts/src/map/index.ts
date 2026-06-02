@@ -4,14 +4,17 @@ import TileLayer from 'ol/layer/Tile.js';
 import OSM from 'ol/source/OSM.js';
 import {fromLonLat} from "ol/proj";
 import VectorSource from "ol/source/Vector";
-import {Feature, MapBrowserEvent, Overlay} from "ol";
+import {Feature, Geolocation, MapBrowserEvent, Overlay} from "ol";
 import VectorLayer from "ol/layer/Vector";
 import {Fill, Icon, Stroke, Style} from "ol/style";
 import {Utils} from "./Utils";
 import {manageMapOnMove} from "./MapOnMove";
 import {manageMapOnClick} from "./MapOnClick";
-import {Circle} from "ol/geom";
+import {Circle, Geometry} from "ol/geom";
 import {FavouriteManager} from "./FavouriteManager";
+import {Polyline} from "ol/format";
+import {V} from "ol/renderer/webgl/FlowLayer";
+import {GoToManager} from "./GoToManager";
 
 export const UserName: string = document.getElementById("username")!.textContent;
 
@@ -131,6 +134,8 @@ export const map: Map = new Map({
     })
 });
 
+export let goto: GoToManager | undefined = undefined;
+
 function initGeolocation(): void
 {
     const feature: Feature = new Feature();
@@ -143,8 +148,17 @@ function initGeolocation(): void
             stroke: new Stroke({ color: "rgb(28, 123, 251)" })
         })
     }));
-    navigator.geolocation.getCurrentPosition((info: GeolocationPosition): void => map.getView().setCenter(fromLonLat([info.coords.longitude, info.coords.latitude])));
-    navigator.geolocation.watchPosition((info: GeolocationPosition): void => feature.setGeometry(new Circle(fromLonLat([info.coords.longitude, info.coords.latitude]), info.coords.accuracy)));
+    navigator.geolocation.getCurrentPosition((info: GeolocationPosition): void => {
+        map.getView().setCenter(fromLonLat([info.coords.longitude, info.coords.latitude]))
+        goto = new GoToManager(map, [info.coords.longitude, info.coords.latitude]);
+    });
+    navigator.geolocation.watchPosition((info: GeolocationPosition): void => {
+        feature.setGeometry(new Circle(fromLonLat([info.coords.longitude, info.coords.latitude]), info.coords.accuracy));
+        if (goto === undefined)
+            goto = new GoToManager(map, [info.coords.longitude, info.coords.latitude]);
+        else
+            goto.onUpdatePosition([info.coords.longitude, info.coords.latitude]);
+    });
     (document.getElementById("locate-btn") as HTMLButtonElement).onclick = (): void => map.getView().animate({ center: (feature.getGeometry() as Circle).getCenter(), zoom: 15, duration: 600 });
 }
 

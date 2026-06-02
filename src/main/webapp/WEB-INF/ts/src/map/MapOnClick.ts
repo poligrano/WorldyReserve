@@ -2,7 +2,7 @@ import {Overlay, MapBrowserEvent, Feature} from "ol";
 import {FeatureLike} from "ol/Feature";
 import {Utils} from "./Utils";
 import {fromLonLat} from "ol/proj";
-import {fav, UserName} from "./index";
+import {fav, goto, UserName} from "./index";
 
 type PopUpState = { status: "idle" } | { status: "loaded", unload: Function, loaded: Feature };
 
@@ -73,6 +73,18 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
     const popUpCommentTextElem: HTMLInputElement = document.getElementById("new-comment") as HTMLInputElement;
     const popUpReserveAElem: HTMLAnchorElement = document.getElementById("reserve-btn") as HTMLAnchorElement;
     let state: PopUpState = { status: "idle" };
+    (document.getElementById("goto-btn") as HTMLButtonElement).onclick = async (): Promise<void> => {
+        if (state.status === "loaded")
+        {
+            if (goto === undefined)
+                Utils.notifyError("Funzione non disponibile", 4000);
+            else
+            {
+                state.unload();
+                goto.openPanel([state.loaded.getProperties().lon, state.loaded.getProperties().lat]);
+            }
+        }
+    }
     (document.getElementById("send-comment-btn") as HTMLButtonElement).onclick = async (): Promise<void> => {
         const comment: string = popUpCommentTextElem.value.trim();
         if (comment.length !== 0 && state.status == "loaded")

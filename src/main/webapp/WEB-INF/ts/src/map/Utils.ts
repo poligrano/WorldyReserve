@@ -1,5 +1,7 @@
 import {Extent} from "ol/extent";
 import {Coordinate} from "ol/coordinate";
+import {Polyline} from "ol/format";
+import {Geometry} from "ol/geom";
 
 export namespace Utils
 {
@@ -106,6 +108,14 @@ export namespace Utils
             }
         }).then((r) => r.json());
     }
+    export async function queryOSRM(w1: Coordinate, w2: Coordinate, type: "car" | "foot" | "bike", signal: AbortSignal | null = null)
+    {
+        console.log("Querying OSRM", w1, w2, type);
+        return fetch(`http://router.project-osrm.org/route/v1/walk/${encodeURIComponent(w1[0])},${encodeURIComponent(w1[1])};${encodeURIComponent(w2[0])},${encodeURIComponent(w2[1])}?overview=full`, {
+            signal: signal,
+            method: "GET"
+        }).then((r) => r.json());
+    }
     function initNotifyError(): (mx: string, duration: number) => void
     {
         let timer: number | undefined = undefined;
@@ -128,4 +138,13 @@ export namespace Utils
     {
         return window.innerWidth <= 600;
     }
+    function initPolyToGeom(): (polyline: any) => Geometry
+    {
+        const poly = new Polyline({ factor: 1e5 });
+        return (polyline: any): Geometry => poly.readGeometry(polyline, {
+            dataProjection: "EPSG:4326",
+            featureProjection: "EPSG:3857"
+        });
+    }
+    export const polyToGeom: (polyline: any) => Geometry = initPolyToGeom();
 }

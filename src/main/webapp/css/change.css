@@ -115,9 +115,6 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
 }
-@media (max-width: 480px) {
-    .form-row { grid-template-columns: 1fr; }
-}
 
 .form-group { margin-bottom: 1.1rem; }
 .form-group:last-child { margin-bottom: 0; }

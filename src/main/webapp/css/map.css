@@ -17,7 +17,7 @@ html, body {
 header {
     position: fixed;
     top: 0; left: 0; right: 0;
-    z-index: 1000;
+    z-index: 1200;
     height: 56px;
     display: flex;
     align-items: center;
@@ -186,6 +186,7 @@ header {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
+    z-index: 1200;
     min-width: 160px;
     background: rgba(30, 19, 8, 0.96);
     border: 1px solid var(--border);
@@ -550,6 +551,175 @@ header {
     opacity: 0.7;
 }
 
+.nav-panel {
+    position: fixed;
+    top: 56px;
+    right: 0;
+    width: 330px;
+    max-width: 90vw;
+    height: calc(100% - 56px);
+    background: #1C1209;
+    border-left: 2px solid #C87941;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    padding: 1.2rem;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.6);
+    color: #EAE0D5;
+    font-family: 'DM Sans', sans-serif;
+    border-radius: 16px 0 0 16px;
+    box-sizing: border-box;
+}
+
+.nav-panel.open {
+    transform: translateX(0);
+}
+
+.nav-close-btn {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid #C87941;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #C87941;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.nav-close-btn:hover {
+    background: rgba(200,121,65,0.2);
+}
+
+.nav-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: #EAE0D5;
+    letter-spacing: 0.02em;
+}
+
+.nav-modes {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+}
+
+.nav-modes input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.mode-label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.55rem 0.3rem;
+    border-radius: 10px;
+    border: 1px solid #5A4A3A;
+    background: transparent;
+    color: #9C8B7C;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    font-family: inherit;
+}
+
+.mode-label:hover {
+    background: rgba(200,121,65,0.1);
+    border-color: #C87941;
+    color: #C87941;
+}
+
+.nav-modes input[type="radio"]:checked + .mode-label {
+    background: rgba(200,121,65,0.2);
+    border-color: #C87941;
+    color: #C87941;
+    font-weight: 600;
+}
+
+.nav-info {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    border: 1px solid #5A4A3A;
+    padding: 1rem;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    color: #EAE0D5;
+}
+
+.info-placeholder {
+    color: #9C8B7C;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.journey-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.summary-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.summary-row i {
+    width: 18px;
+    color: #C87941;
+}
+
+.summary-label {
+    color: #9C8B7C;
+    margin-right: auto;
+}
+
+.summary-value {
+    font-weight: 600;
+    color: #EAE0D5;
+}
+
+.nav-start-btn {
+    width: 100%;
+    padding: 0.7rem;
+    border-radius: 10px;
+    border: none;
+    background: #C87941;
+    color: #1C1209;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: opacity 0.15s, background 0.15s;
+}
+.nav-start-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #5A4A3A;
+    color: #9C8B7C;
+}
+.nav-start-btn:not(:disabled):hover {
+    background: #E08C4B;
+}
+
 @media (max-width: 600px) {
     header {
         padding: 0 0.75rem;
@@ -561,7 +731,14 @@ header {
     }
 
     .search-wrap {
-        width: 140px;
+        width: auto;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .search-input {
+        min-width: 0;
+        width: 100%;
     }
 
     .ol-overlay-container .hotel-popup,

@@ -4,9 +4,10 @@ import {Utils} from "./Utils";
 
 export class FavouriteManager
 {
-    readonly savedButtonElem: HTMLButtonElement = document.getElementById("hotels-btn") as HTMLButtonElement;
-    readonly dropDownElem: HTMLDivElement = document.getElementById("hotels-dropdown") as HTMLDivElement;
-    readonly favourite: Map<number, any> = new Map;
+    private readonly savedButtonElem: HTMLButtonElement = document.getElementById("hotels-btn") as HTMLButtonElement;
+    private readonly dropDownElem: HTMLDivElement = document.getElementById("hotels-dropdown") as HTMLDivElement;
+    private readonly dropDownLabel: HTMLSpanElement = document.getElementById("dropdown-saved-label") as HTMLSpanElement;
+    private readonly favourite: Map<number, any> = new Map;
     constructor()
     {
         this.savedButtonElem.onclick = (): boolean => this.savedButtonElem.classList.toggle("active", this.dropDownElem.classList.toggle("open"));
@@ -34,6 +35,7 @@ export class FavouriteManager
     }
     public addFavourites(...any: any[]): void
     {
+        this.dropDownLabel.textContent = "Hotel salvati";
         any.forEach((e: any): Map<number, any> => this.favourite.set(e.osm_id, e));
         this.dropDownElem.append(...any.map((e: any): HTMLButtonElement => this.createSavedElem(e)));
     }
@@ -45,5 +47,7 @@ export class FavouriteManager
     {
         document.getElementById(`osm_id${id}`)!.remove();
         this.favourite.delete(id);
+        if (this.favourite.size === 0)
+            this.dropDownLabel.textContent = "Nessun hotel salvato";
     }
 }
