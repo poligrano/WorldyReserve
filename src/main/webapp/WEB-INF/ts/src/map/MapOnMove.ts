@@ -44,7 +44,7 @@ function getOverpassCompatibleBbox(map: Map): Extent
     return transformExtent(map.getView().calculateExtent(map.getSize()), map.getView().getProjection(), "EPSG:4326");
 }
 
-type MapLoadState = { status: "idle" } | { status: "loaded", bbox: Extent } | { status: "loading", bbox: Extent, controller: AbortController, loaded: MapLoadState };
+type MapLoadState = { status: "idle" } | { status: "loaded", bbox: Extent } | { status: "loading", bbox: Extent, controller: AbortController, handle: Promise<void>, loaded: MapLoadState };
 
 export function manageMapOnMove(map: Map, source: VectorSource, layer: VectorLayer, minimumZoom: number, bufferFactor: number): () => Promise<void>
 {
@@ -53,16 +53,20 @@ export function manageMapOnMove(map: Map, source: VectorSource, layer: VectorLay
     {
         const controller: AbortController = new AbortController();
         const buffered: Extent = bboxBuffer(bbox, map.getView().getZoom()! * bufferFactor);
-        state = { status: "loading", bbox: buffered, controller, loaded: state };
-        const elements: any[] | false = await tryQueryOverpass(buffered, controller.signal);
-        if (elements === false)
-            state = state.loaded;
-        else
-        {
-            source.clear();
-            addElementsToSource(source, elements);
-            state = { status: "loaded", bbox: buffered };
-        }
+        state = { status: "loading", bbox: buffered, controller, loaded: state, handle: (async (): Promise<void> =>{
+            const elements: any[] | false = await tryQueryOverpass(buffered, controller.signal);
+            if (state.status === "loading" && state.bbox === buffered)
+            {
+                if (elements === false)
+                    state = state.loaded;
+                else
+                {
+                    source.clear();
+                    addElementsToSource(source, elements);
+                    state = {status: "loaded", bbox: buffered};
+                }
+            }
+        })()};
     }
     return async (): Promise<void> => {
         const zoom: number = map.getView().getZoom()!;
@@ -91,9 +95,13 @@ export function manageMapOnMove(map: Map, source: VectorSource, layer: VectorLay
                 case "loading":
                     if (!containsExtent(state.bbox, currentBbox))
                     {
+                        const loaded: MapLoadState = state.loaded;
                         state.controller.abort();
-                        if (state.loaded.status !== "loaded" || !containsExtent(state.loaded.bbox, currentBbox))
+                        await state.handle;
+                        if (loaded.status !== "loaded" || !containsExtent(loaded.bbox, currentBbox))
                             await load(currentBbox);
+                        else
+                            state = state.loaded;
                     }
                     break;
             }
