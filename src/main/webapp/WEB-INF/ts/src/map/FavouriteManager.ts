@@ -21,7 +21,6 @@ export class FavouriteManager
     }
     createSavedElem(saved: any): HTMLButtonElement
     {
-        console.log("Parsing Saved", saved);
         const elem: HTMLButtonElement = document.createElement("button");
         elem.className = "dropdown-item";
         elem.id = `osm_id${saved.osm_id}`;

@@ -8,20 +8,27 @@ import java.util.ArrayList;
 
 public class Comment
 {
+    private final Long commentId;
     private final long leaverId;
     private final String displayName;
     private final String comment;
     private final int whenPosted;
-    public Comment(long leaverId, String displayName, String comment, int whenPosted)
+    public Comment(Long commentId, long leaverId, String displayName, String comment, int whenPosted)
     {
+        this.commentId = commentId;
         this.leaverId = leaverId;
         this.displayName = displayName;
         this.comment = comment;
         this.whenPosted = whenPosted;
     }
+    public Comment(long leaverId, String displayName, String comment, int whenPosted)
+    {
+        this(null, leaverId, displayName, comment, whenPosted);
+    }
     public JSONObject toJSON()
     {
         JSONObject json = new JSONObject();
+        json.put("comment_id", commentId);
         json.put("leaver_id", leaverId);
         json.put("display_name", displayName);
         json.put("comment", comment);

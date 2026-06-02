@@ -1,6 +1,6 @@
 import {Overlay, MapBrowserEvent, Feature} from "ol";
 import {FeatureLike} from "ol/Feature";
-import {Utils} from "./Utils";
+import {RestResult, Utils} from "./Utils";
 import {fromLonLat} from "ol/proj";
 import {fav, goto, UserName} from "./index";
 
@@ -39,16 +39,16 @@ function saveInFeature(feature: Feature, poi: any, nominatim: any | null, embedd
         feature.setProperties(poi);
 }
 
-function saveNewOwnComment(feature: Feature, comment: string): { comment: string, display_name: string, when_posted: number }
+function saveNewOwnComment(feature: Feature, comment: string, comment_id: number): { comment: string, display_name: string, when_posted: number, comment_id: number }
 {
     const poi: any = feature.getProperties();
-    const new_comment = { comment: comment, display_name: UserName, when_posted: Math.trunc(Date.now() / 1000) };
+    const new_comment = { comment: comment, display_name: UserName, when_posted: Math.trunc(Date.now() / 1000), comment_id: comment_id };
     (poi.embedded_meta.own_comments as Array<any>).push(new_comment);
     feature.setProperties(poi);
     return new_comment;
 }
 
-function createCommentElem(comment: any): HTMLDivElement
+function createCommentElem(comment: any, own: boolean): HTMLDivElement
 {
     const elem: HTMLDivElement = document.createElement("div");
     elem.className = "comment-card";
@@ -59,7 +59,25 @@ function createCommentElem(comment: any): HTMLDivElement
             <span class="comment-date">${Utils.getLocaleDateTime(comment.when_posted * 1000)}</span>
           </div>
           <p class="comment-text">${comment.comment}</p>`;
+    if (own)
+        appendDeleteButton(elem, comment.comment_id);
     return elem;
+}
+
+function appendDeleteButton(card: HTMLDivElement, id: number): void
+{
+    const btn: HTMLButtonElement = document.createElement("button");
+    btn.type = "button";
+    btn.className = "delete-comment-btn";
+    btn.innerHTML = "<i class=\"fas fa-trash-alt\"></i>";
+    btn.onclick = async (): Promise<void> => {
+        const res: RestResult = await Utils.queryDeleteComment(id);
+        if (!res.ok)
+            Utils.notifyError(res.mx, 4000);
+        else
+            card.remove();
+    }
+    card.querySelector("div")!.append(btn);
 }
 
 export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
@@ -89,11 +107,11 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
         const comment: string = popUpCommentTextElem.value.trim();
         if (comment.length !== 0 && state.status == "loaded")
         {
-            const res: string | true =  await Utils.queryPostComment(state.loaded.getId() as number, comment);
-            if (res !== true)
-                Utils.notifyError(res, 4000);
+            const res: RestResult =  await Utils.queryPostComment(state.loaded.getId() as number, comment);
+            if (!res.ok)
+                Utils.notifyError(res.mx, 4000);
             else
-                renderNewOwnComment(saveNewOwnComment(state.loaded, comment));
+                renderNewOwnComment(saveNewOwnComment(state.loaded, comment, Number.parseInt(res.mx)));
         }
     }
     (document.getElementById("popup-close") as HTMLButtonElement).onclick = unload;
@@ -128,9 +146,9 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
             overlay.setPosition(undefined);
         if (state.status === "loaded")
         {
-            const res: string | true = await Utils.queryUpdateMeta(state.loaded.getId() as number, state.loaded.getProperties().embedded_meta.does_like, state.loaded.getProperties().embedded_meta.favourite)
-            if (res !== true)
-                Utils.notifyError(res, 4000);
+            const res: RestResult = await Utils.queryUpdateMeta(state.loaded.getId() as number, state.loaded.getProperties().embedded_meta.does_like, state.loaded.getProperties().embedded_meta.favourite)
+            if (!res.ok)
+                Utils.notifyError(res.mx, 4000);
         }
         state = { status: "idle" };
     }
@@ -142,9 +160,9 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
         if (state.status === "loaded")
             render(feature.getProperties());
     }
-    function renderNewOwnComment(comment: { display_name: string, when_posted: number }): void
+    function renderNewOwnComment(comment: any): void
     {
-        const commentElem: HTMLDivElement = createCommentElem(comment);
+        const commentElem: HTMLDivElement = createCommentElem(comment, true);
         if (popUpCommentsElem.firstChild == null)
             popUpCommentsElem.appendChild(commentElem)
         else
@@ -179,11 +197,10 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
     }
     function renderComments(comments: Array<any>): void
     {
-        popUpCommentsElem.replaceChildren(...comments.map((c: any): HTMLDivElement => createCommentElem(c)));
+        popUpCommentsElem.replaceChildren(...comments.map((c: any): HTMLDivElement => createCommentElem(c, c.comment_id !== undefined)));
     }
     function render(poi: any): void
     {
-        console.log(poi);
         popUpNameElem.textContent = poi.nominatim.name;
         popUpAddrElem.textContent = poi.nominatim.display_name;
         renderLike(poi.embedded_meta.does_like, poi.embedded_meta.poi.like_number);

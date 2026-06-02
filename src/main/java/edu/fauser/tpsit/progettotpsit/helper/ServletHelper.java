@@ -81,7 +81,7 @@ public class ServletHelper
         {
             response.setStatus(sc);
             response.setContentType(contentType);
-            response.getOutputStream().println(message);
+            response.getOutputStream().print(message);
             response.flushBuffer();
         }
         catch (IOException e)

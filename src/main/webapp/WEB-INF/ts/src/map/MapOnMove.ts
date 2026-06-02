@@ -15,7 +15,6 @@ function bboxBuffer(bbox: Extent, percentage: number): Extent
 
 function addElementsToSource(source: VectorSource, elements: Array<any>): void
 {
-    console.log(`Parsing Overpass result: ${elements}`);
     source.addFeatures(elements.map((e: any): Feature => {
         const f = new Feature({
             geometry: new Point(fromLonLat([e.lon, e.lat]))
@@ -34,7 +33,6 @@ async function tryQueryOverpass(bbox: Extent, signal: AbortSignal): Promise<Arra
     }
     catch (e)
     {
-        console.log(e);
         return false;
     }
 }

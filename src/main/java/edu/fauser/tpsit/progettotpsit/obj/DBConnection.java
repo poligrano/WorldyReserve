@@ -198,7 +198,7 @@ public class DBConnection implements AutoCloseable
     {
         ArrayList<Comment> comments = new ArrayList<>();
         while (res.next())
-            comments.add(new Comment(fixedId, res.getString(1) + " " + res.getString(2), res.getString(3), res.getInt(4)));
+            comments.add(new Comment(res.getLong(5), fixedId, res.getString(1) + " " + res.getString(2), res.getString(3), res.getInt(4)));
         return comments;
     }
     public POIMeta getPoiMeta(long osmId) throws SQLException
@@ -208,7 +208,7 @@ public class DBConnection implements AutoCloseable
     public UserPOIMeta getUserPoiMeta(long osmId, long userId) throws SQLException
     {
         try (CallableStatement callStmt = con.prepareCall("{CALL GET_USER_POI_META(?, ?, ?, ?, ?)}");
-             PreparedStatement prepStmt = con.prepareCall("SELECT u.name, u.surname, upc.comment, UNIX_TIMESTAMP(upc.when_posted) FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id = ? ORDER BY upc.when_posted ASC"))
+             PreparedStatement prepStmt = con.prepareCall("SELECT u.name, u.surname, upc.comment, UNIX_TIMESTAMP(upc.when_posted), upc.id FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id = ? ORDER BY upc.when_posted ASC"))
         {
             callStmt.setLong(1, userId);
             callStmt.setLong(2, osmId);
@@ -232,14 +232,16 @@ public class DBConnection implements AutoCloseable
             stmt.execute();
         }
     }
-    public void postComment(long osmId, long userId, String comment) throws SQLException
+    public long postComment(long osmId, long userId, String comment) throws SQLException
     {
-        try (CallableStatement stmt = con.prepareCall("{CALL POST_COMMENT(?, ?, ?)}"))
+        try (CallableStatement stmt = con.prepareCall("{CALL POST_COMMENT(?, ?, ?, ?)}"))
         {
             stmt.setLong(1, osmId);
             stmt.setLong(2, userId);
             stmt.setString(3, comment);
+            stmt.registerOutParameter(4, Types.BIGINT);
             stmt.execute();
+            return stmt.getLong(4);
         }
     }
     public long reservePoi(long osmId, long userId, Timestamp start, Timestamp end) throws SQLException
@@ -258,6 +260,15 @@ public class DBConnection implements AutoCloseable
     public void deleteReservation(long id, long uid) throws SQLException
     {
         try (CallableStatement stmt = con.prepareCall("{CALL DELETE_RESERVATION(?, ?)}"))
+        {
+            stmt.setLong(1, id);
+            stmt.setLong(2, uid);
+            stmt.execute();
+        }
+    }
+    public void deleteComment(long id, long uid) throws SQLException
+    {
+        try(CallableStatement stmt = con.prepareCall("{CALL DELETE_COMMENT(?, ?)}"))
         {
             stmt.setLong(1, id);
             stmt.setLong(2, uid);

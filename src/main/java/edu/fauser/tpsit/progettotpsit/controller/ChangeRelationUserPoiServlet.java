@@ -63,12 +63,36 @@ public class ChangeRelationUserPoiServlet extends HttpServlet
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     {
+        ServletHelper.checkSession(request, response, "uid", (req, resp) -> ServletHelper.restRespond(resp, HttpServletResponse.SC_UNAUTHORIZED, "Nessuna sessione trovata", getServletContext()), this::postComment);
+    }
+    private void postComment(HttpServletRequest request, HttpServletResponse response)
+    {
         try
         {
             if (ServletHelper.checkParams(request, "id", "comment"))
+                ServletHelper.restRespond(response, HttpServletResponse.SC_OK, String.valueOf(con.postComment(Long.parseLong(request.getParameter("id")), (Long) request.getSession().getAttribute("uid"), request.getParameter("comment"))), getServletContext());
+            else
+                ServletHelper.restRespond(response, HttpServletResponse.SC_BAD_REQUEST, "Parametri mancanti", getServletContext());
+        }
+        catch (SQLException e)
+        {
+            log(e.getMessage(), e);
+            ServletHelper.restRespond(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore del Server!", getServletContext());
+        }
+    }
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response)
+    {
+        ServletHelper.checkSession(request, response, "uid", (req, resp) -> ServletHelper.restRespond(resp, HttpServletResponse.SC_UNAUTHORIZED, "Nessuna sessione trovata", getServletContext()), this::deleteComment);
+    }
+    private void deleteComment(HttpServletRequest request, HttpServletResponse response)
+    {
+        try
+        {
+            if (ServletHelper.checkParams(request, "id"))
             {
-                con.postComment(Long.parseLong(request.getParameter("id")), (Long) request.getSession().getAttribute("uid"), request.getParameter("comment"));
-                ServletHelper.restRespond(response, HttpServletResponse.SC_OK, "Commento postato", getServletContext());
+                con.deleteComment(Long.parseLong(request.getParameter("id")), (Long) request.getSession().getAttribute("uid"));
+                ServletHelper.restRespond(response, HttpServletResponse.SC_OK, "Commento eliminato", getServletContext());
             }
             else
                 ServletHelper.restRespond(response, HttpServletResponse.SC_BAD_REQUEST, "Parametri mancanti", getServletContext());

@@ -3,6 +3,8 @@ import {Coordinate} from "ol/coordinate";
 import {Polyline} from "ol/format";
 import {Geometry} from "ol/geom";
 
+export type RestResult = { ok: boolean, mx: string };
+
 export namespace Utils
 {
     //const ProjectServerURL = "http://192.168.0.136:8080/ProgettoTPSIT_war_exploded";
@@ -20,7 +22,7 @@ export namespace Utils
     {
         console.log("Querying Overpass", bbox);
         const [minLon, minLat, maxLon, maxLat] = bbox;
-        const query = `[out:json][timeout:10];
+        const query = `[out:json][timeout:5];
                     node(${minLat},${minLon},${maxLat},${maxLon})[tourism=hotel];
                     out skel qt;`;
         return fetch("https://overpass-api.de/api/interpreter", {
@@ -55,7 +57,7 @@ export namespace Utils
             }
         }).then((r) => r.json());
     }
-    export async function queryUpdateMeta(id: number, does_like: boolean, favourite: boolean, signal: AbortSignal | null = null): Promise<string | true>
+    export async function queryUpdateMeta(id: number, does_like: boolean, favourite: boolean, signal: AbortSignal | null = null): Promise<RestResult>
     {
         console.log("Querying Project Servlet Meta Update", id, does_like, favourite);
         return fetch(`${ProjectServerURL}/updatemeta?id=${encodeURIComponent(id)}&does_like=${encodeURIComponent(does_like)}&favourite=${encodeURIComponent(favourite)}`, {
@@ -64,9 +66,9 @@ export namespace Utils
             headers: {
                 "User-Agent": navigator.userAgent
             }
-        }).then(async (r: Response): Promise<string | true> => (r.ok ? true : await r.text()));
+        }).then(async (r: Response): Promise<RestResult> => { return { ok: r.ok, mx: await r.text() } });
     }
-    export async function queryPostComment(id: number, comment: string, signal: AbortSignal | null = null): Promise<string | true>
+    export async function queryPostComment(id: number, comment: string, signal: AbortSignal | null = null): Promise<RestResult>
     {
         console.log("Querying Project Servlet Post Comment", id, comment);
         return fetch(`${ProjectServerURL}/updatemeta`, {
@@ -77,7 +79,7 @@ export namespace Utils
                 "User-Agent": navigator.userAgent
             },
             body: `id=${encodeURIComponent(id)}&comment=${encodeURIComponent(comment)}`
-        }).then(async (r: Response): Promise<string | true> => (r.ok ? true : await r.text()));
+        }).then(async (r: Response): Promise<RestResult> => { return { ok: r.ok, mx: await r.text() } });
     }
     export async function querySearchNominatim(search: string, signal: AbortSignal | null = null): Promise<Array<any>>
     {
@@ -115,6 +117,17 @@ export namespace Utils
             signal: signal,
             method: "GET"
         }).then((r) => r.json());
+    }
+    export async function queryDeleteComment(id: number, signal: AbortSignal | null = null): Promise<RestResult>
+    {
+        console.log("Querying Project Servlet Delete Comment", id);
+        return fetch(`${ProjectServerURL}/updatemeta?id=${encodeURIComponent(id)}`, {
+            signal: signal,
+            method: "DELETE",
+            headers: {
+                "User-Agent": navigator.userAgent
+            }
+        }).then(async (r: Response): Promise<RestResult> => { return { ok: r.ok, mx: await r.text() } });
     }
     function initNotifyError(): (mx: string, duration: number) => void
     {

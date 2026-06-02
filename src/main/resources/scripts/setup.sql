@@ -70,7 +70,7 @@ CREATE TABLE users_poi (
 );
 
 CREATE TABLE users_poi_comment (
-    id TINYINT UNSIGNED AUTO_INCREMENT,
+    id BIGINT UNSIGNED AUTO_INCREMENT,
     user_id BIGINT UNSIGNED NOT NULL,
     osm_id BIGINT UNSIGNED NOT NULL,
     comment VARCHAR(255) NOT NULL,
@@ -350,10 +350,11 @@ BEGIN
     ON DUPLICATE KEY UPDATE does_like = v_does_like, favourite = v_favourite, last_interacted = NOW();
 END//
 
-CREATE PROCEDURE POST_COMMENT(v_osm_id TYPE OF users_poi.osm_id, v_id TYPE OF users.id, v_comment TYPE OF users_poi_comment.comment)
+CREATE PROCEDURE POST_COMMENT(v_osm_id TYPE OF users_poi.osm_id, v_id TYPE OF users.id, v_comment TYPE OF users_poi_comment.comment, OUT v_comment_id TYPE OF users_poi_comment.id)
 BEGIN
     INSERT INTO users_poi_comment(user_id, osm_id, comment)
     VALUES (v_id, v_osm_id, v_comment);
+    SET v_comment_id = LAST_INSERT_ID();
 END//
 
 CREATE PROCEDURE RESERVE_POI(v_osm_id TYPE OF users_reserve_poi.osm_id, v_id TYPE OF users.id, v_start TYPE OF users_reserve_poi.start, v_end TYPE OF users_reserve_poi.end, OUT v_reservation_id TYPE OF users_reserve_poi.id)
@@ -384,6 +385,13 @@ BEGIN
     FROM    users AS u
             INNER JOIN users_email AS ue ON u.email = ue.id
     WHERE   u.id = v_id;
+END//
+
+CREATE PROCEDURE DELETE_COMMENT(v_id TYPE OF users_poi_comment.id, v_user_id TYPE OF users.id)
+BEGIN
+    DELETE FROM users_poi_comment
+    WHERE   id = v_id
+            AND user_id = v_user_id;
 END//
 
 DELIMITER ;
