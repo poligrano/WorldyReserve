@@ -25,15 +25,17 @@
     <p>Completa la tua prenotazione all'hotel ${param.name}</p>
   </div>
   <form action="reserve" method="post" onsubmit="return Utils.onSubmitCheck()">
-    <input type="text" name="id" value="${param.id}" hidden>
-    <input type="text" name="name" value="${param.name}" hidden>
+    <input type="text" name="id" value="${param.id}" hidden />
+    <input type="text" name="name" value="${param.name}" hidden />
+    <input type="text" name="start-epoch" id="start-val" hidden />
+    <input type="text" name="end-epoch" id="end-val" hidden />
     <div class="form-group">
       <label for="start">Dal giorno</label>
-      <input id="start" type="date" name="start" required />
+      <input id="start" name="start" type="datetime-local" required />
     </div>
     <div class="form-group">
       <label for="end">Fino al</label>
-      <input id="end" type="date" name="end" required />
+      <input id="end" name="end" type="datetime-local" required />
     </div>
     <button type="submit" class="btn-primary">Prenota</button>
   </form>
@@ -41,3 +43,6 @@
 </body>
 </html>
 <script src="ts/dist/Utils.js"></script>
+<script>
+  Utils.initSendReserve();
+</script>

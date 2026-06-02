@@ -11,8 +11,8 @@ public class Comment
     private final long leaverId;
     private final String displayName;
     private final String comment;
-    private final Date whenPosted;
-    public Comment(long leaverId, String displayName, String comment, Date whenPosted)
+    private final int whenPosted;
+    public Comment(long leaverId, String displayName, String comment, int whenPosted)
     {
         this.leaverId = leaverId;
         this.displayName = displayName;
@@ -25,7 +25,7 @@ public class Comment
         json.put("leaver_id", leaverId);
         json.put("display_name", displayName);
         json.put("comment", comment);
-        json.put("when_posted", whenPosted.toString());
+        json.put("when_posted", whenPosted);
         return json;
     }
     public static JSONArray toJSONArray(ArrayList<Comment> arr)

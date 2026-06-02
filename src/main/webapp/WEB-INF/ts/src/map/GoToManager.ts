@@ -96,13 +96,16 @@ export class GoToManager
         const h: number = Math.trunc(duration / (60 * 60));
         duration -= h * 60 * 60;
         const m: number = Math.trunc(duration / 60);
-        return (h >= 1 ? `${h} h ` : "") + (m >= 1 ? m : "1") + " min";
+        return (h >= 1 ? `${h} h ` : "") + (m >= 1 ? m : Math.ceil(m)) + " min";
     }
     private calculateArrivalTime(duration: number): string
     {
         const time = new Date();
         time.setSeconds(time.getSeconds() + duration);
-        return `${time.getHours()}:${time.getMinutes()}`;
+        return time.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
     }
     private drawRoute(polyline: any): Feature
     {

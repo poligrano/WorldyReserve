@@ -130,9 +130,10 @@ export namespace Utils
         }
     }
     export const notifyError: (mx: string, duration: number) => void = initNotifyError();
-    export function getCurrentDateStr(): string
+    export function getLocaleDateTime(epoch: number | null = null): string
     {
-        return (new Date()).toISOString().substring(0, 10);
+        const date = (epoch === null ? new Date() : new Date(epoch));
+        return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
     }
     export function isMobile(): boolean
     {

@@ -74,7 +74,7 @@ CREATE TABLE users_poi_comment (
     user_id BIGINT UNSIGNED NOT NULL,
     osm_id BIGINT UNSIGNED NOT NULL,
     comment VARCHAR(255) NOT NULL,
-    when_posted DATE NOT NULL DEFAULT CURDATE(),
+    when_posted TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users(id)
        ON DELETE CASCADE
@@ -85,8 +85,8 @@ CREATE TABLE users_reserve_poi (
     id BIGINT UNSIGNED AUTO_INCREMENT,
     user_id BIGINT UNSIGNED NOT NULL,
     osm_id BIGINT UNSIGNED NOT NULL,
-    start DATE NOT NULL,
-    end DATE NOT NULL,
+    start TIMESTAMP NOT NULL,
+    end TIMESTAMP NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users(id)
        ON DELETE CASCADE
@@ -117,9 +117,9 @@ BEGIN
             AND urp.user_id = NEW.user_id
     ORDER BY    urp.end DESC
     LIMIT 1;
-    IF  NEW.start < CURDATE()
+    IF  NEW.start < NOW()
         OR NEW.end < NEW.start
-        OR v_last_reserve > CURDATE() THEN
+        OR v_last_reserve > NOW() THEN
             SIGNAL SQLSTATE "45000"
                 SET MESSAGE_TEXT = "Invalid reservation";
     END IF;
@@ -327,7 +327,7 @@ BEGIN
     FROM    users_poi AS up
     WHERE   up.user_id = v_id
       AND up.osm_id = v_osm_id;
-    SET v_reserved = CURDATE() < ANY (
+    SET v_reserved = NOW() < ANY (
         SELECT  urp.end
         FROM    users_reserve_poi AS urp
         WHERE   urp.user_id = v_id

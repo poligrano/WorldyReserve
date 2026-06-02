@@ -11,6 +11,8 @@ import javax.servlet.annotation.*;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 @WebServlet(name = "ReserveServlet", value = "/reserve")
 public class ReserveServlet extends HttpServlet
@@ -84,9 +86,9 @@ public class ReserveServlet extends HttpServlet
         {
             try
             {
-                if (ServletHelper.checkParams(request, "id", "name", "start", "end"))
+                if (ServletHelper.checkParams(request, "id", "name", "start", "end", "start-epoch", "end-epoch"))
                 {
-                    long id = con.reservePoi(Long.parseLong(request.getParameter("id")), (Long) request.getSession().getAttribute("uid"), Date.valueOf(request.getParameter("start")), Date.valueOf(request.getParameter("end")));
+                    long id = con.reservePoi(Long.parseLong(request.getParameter("id")), (Long) request.getSession().getAttribute("uid"), Timestamp.from(Instant.ofEpochSecond(Integer.parseInt(request.getParameter("start-epoch")))), Timestamp.from(Instant.ofEpochSecond(Integer.parseInt(request.getParameter("end-epoch")))));
                     request.setAttribute("userName", con.retrieveUserName((Long) request.getSession().getAttribute("uid")));
                     request.setAttribute("name", request.getParameter("name"));
                     request.setAttribute("start", request.getParameter("start"));

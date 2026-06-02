@@ -39,10 +39,10 @@ function saveInFeature(feature: Feature, poi: any, nominatim: any | null, embedd
         feature.setProperties(poi);
 }
 
-function saveNewOwnComment(feature: Feature, comment: string): { comment: string, display_name: string, when_posted: string }
+function saveNewOwnComment(feature: Feature, comment: string): { comment: string, display_name: string, when_posted: number }
 {
     const poi: any = feature.getProperties();
-    const new_comment = { comment: comment, display_name: UserName, when_posted: Utils.getCurrentDateStr() };
+    const new_comment = { comment: comment, display_name: UserName, when_posted: Math.trunc(Date.now() / 1000) };
     (poi.embedded_meta.own_comments as Array<any>).push(new_comment);
     feature.setProperties(poi);
     return new_comment;
@@ -56,7 +56,7 @@ function createCommentElem(comment: any): HTMLDivElement
           <div class="comment-meta">
             <img class="comment-avatar" src="image${comment.leaver_id !== undefined ? `?id=${comment.leaver_id}` : ""}" alt="!" />
             <span class="comment-author">${comment.display_name}</span>
-            <span class="comment-date">${comment.when_posted}</span>
+            <span class="comment-date">${Utils.getLocaleDateTime(comment.when_posted * 1000)}</span>
           </div>
           <p class="comment-text">${comment.comment}</p>`;
     return elem;
@@ -107,7 +107,7 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
             renderLike(poi.embedded_meta.does_like, poi.embedded_meta.poi.like_number);
         }
     }
-    (document.getElementById("fav-btn") as HTMLButtonElement).onclick = () => {
+    (document.getElementById("fav-btn") as HTMLButtonElement).onclick = (): void => {
         if (state.status === "loaded")
         {
             const poi: any = state.loaded.getProperties();
@@ -142,7 +142,7 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
         if (state.status === "loaded")
             render(feature.getProperties());
     }
-    function renderNewOwnComment(comment: { display_name: string, when_posted: string }): void
+    function renderNewOwnComment(comment: { display_name: string, when_posted: number }): void
     {
         const commentElem: HTMLDivElement = createCommentElem(comment);
         if (popUpCommentsElem.firstChild == null)

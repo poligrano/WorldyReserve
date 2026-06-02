@@ -177,7 +177,7 @@ public class DBConnection implements AutoCloseable
     private POIMeta getPoiMeta(long osmId, Long ignoreId) throws SQLException
     {
         try (CallableStatement callStmt = con.prepareCall("{CALL GET_POI_META(?, ?)}");
-             PreparedStatement prepStmt = con.prepareCall("SELECT u.id, u.name, u.surname, upc.comment, upc.when_posted FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id != ? ORDER BY upc.when_posted ASC"))
+             PreparedStatement prepStmt = con.prepareCall("SELECT u.id, u.name, u.surname, upc.comment, UNIX_TIMESTAMP(upc.when_posted) FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id != ? ORDER BY upc.when_posted ASC"))
         {
             callStmt.setLong(1, osmId);
             callStmt.registerOutParameter(2, Types.BIGINT);
@@ -191,14 +191,14 @@ public class DBConnection implements AutoCloseable
     {
         ArrayList<Comment> comments = new ArrayList<>();
         while (res.next())
-            comments.add(new Comment(res.getLong(1), res.getString(2) + " " + res.getString(3), res.getString(4), res.getDate(5)));
+            comments.add(new Comment(res.getLong(1), res.getString(2) + " " + res.getString(3), res.getString(4), res.getInt(5)));
         return comments;
     }
     private ArrayList<Comment> buildCommentsArray(ResultSet res, long fixedId) throws SQLException
     {
         ArrayList<Comment> comments = new ArrayList<>();
         while (res.next())
-            comments.add(new Comment(fixedId, res.getString(1) + " " + res.getString(2), res.getString(3), res.getDate(4)));
+            comments.add(new Comment(fixedId, res.getString(1) + " " + res.getString(2), res.getString(3), res.getInt(4)));
         return comments;
     }
     public POIMeta getPoiMeta(long osmId) throws SQLException
@@ -208,7 +208,7 @@ public class DBConnection implements AutoCloseable
     public UserPOIMeta getUserPoiMeta(long osmId, long userId) throws SQLException
     {
         try (CallableStatement callStmt = con.prepareCall("{CALL GET_USER_POI_META(?, ?, ?, ?, ?)}");
-             PreparedStatement prepStmt = con.prepareCall("SELECT u.name, u.surname, upc.comment, upc.when_posted FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id = ? ORDER BY upc.when_posted ASC"))
+             PreparedStatement prepStmt = con.prepareCall("SELECT u.name, u.surname, upc.comment, UNIX_TIMESTAMP(upc.when_posted) FROM users_poi_comment AS upc INNER JOIN users AS u ON u.id = upc.user_id WHERE upc.osm_id = ? AND upc.user_id = ? ORDER BY upc.when_posted ASC"))
         {
             callStmt.setLong(1, userId);
             callStmt.setLong(2, osmId);
@@ -242,14 +242,14 @@ public class DBConnection implements AutoCloseable
             stmt.execute();
         }
     }
-    public long reservePoi(long osmId, long userId, Date start, Date end) throws SQLException
+    public long reservePoi(long osmId, long userId, Timestamp start, Timestamp end) throws SQLException
     {
         try (CallableStatement stmt = con.prepareCall("{CALL RESERVE_POI(?, ?, ?, ?, ?)}"))
         {
             stmt.setLong(1, osmId);
             stmt.setLong(2, userId);
-            stmt.setDate(3, start);
-            stmt.setDate(4, end);
+            stmt.setTimestamp(3, start);
+            stmt.setTimestamp(4, end);
             stmt.registerOutParameter(5, Types.BIGINT);
             stmt.execute();
             return stmt.getLong(5);
