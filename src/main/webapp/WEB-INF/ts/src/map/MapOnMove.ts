@@ -74,10 +74,7 @@ export function manageMapOnMove(map: Map, source: VectorSource, layer: VectorLay
         if (zoom < minimumZoom)
         {
             if (state.status === "loading")
-            {
                 state.controller.abort();
-                state = state.loaded;
-            }
             layer.setVisible(false);
         }
         else
