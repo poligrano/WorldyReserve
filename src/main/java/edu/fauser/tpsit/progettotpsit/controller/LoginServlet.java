@@ -15,7 +15,7 @@ public class LoginServlet extends HttpServlet
 {
     private DBConnection con;
     @Override
-    public void init()
+    public void init() throws ServletException
     {
         try
         {
@@ -24,6 +24,7 @@ public class LoginServlet extends HttpServlet
         catch (SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
@@ -39,11 +40,11 @@ public class LoginServlet extends HttpServlet
         }
     }
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", this::manageNewSession, ServletHelper::defaultManageExistingSession);
     }
-    private void manageNewSession(HttpServletRequest request, HttpServletResponse response)
+    private void manageNewSession(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -56,9 +57,10 @@ public class LoginServlet extends HttpServlet
             else
                 ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_FORBIDDEN, "Accesso non riuscito", "login", true);
         }
-        catch (SQLException | IOException | ServletException e)
+        catch (SQLException | IOException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
 }

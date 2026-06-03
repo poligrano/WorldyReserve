@@ -14,7 +14,7 @@ public class LoaderServlet extends HttpServlet
 {
     private DBConnection con;
     @Override
-    public void init()
+    public void init() throws ServletException
     {
         try
         {
@@ -23,6 +23,7 @@ public class LoaderServlet extends HttpServlet
         catch (SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
@@ -38,11 +39,11 @@ public class LoaderServlet extends HttpServlet
         }
     }
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", this::manageNoSession, this::load);
     }
-    private void load(HttpServletRequest request, HttpServletResponse response)
+    private void load(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -50,20 +51,22 @@ public class LoaderServlet extends HttpServlet
             request.setAttribute("saved", con.getUserSaved((Long) request.getSession().getAttribute("uid")));
             request.getRequestDispatcher("map.jsp").forward(request, response);
         }
-        catch (SQLException | ServletException | IOException e)
+        catch (SQLException | IOException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
-    private void manageNoSession(HttpServletRequest request, HttpServletResponse response)
+    private void manageNoSession(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
             ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Accesso richiesto", "login", true);
         }
-        catch (IOException | ServletException e)
+        catch (IOException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
 }

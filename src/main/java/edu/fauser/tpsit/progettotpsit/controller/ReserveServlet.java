@@ -19,7 +19,7 @@ public class ReserveServlet extends HttpServlet
 {
     private DBConnection con;
     @Override
-    public void init()
+    public void init() throws ServletException
     {
         try
         {
@@ -28,6 +28,7 @@ public class ReserveServlet extends HttpServlet
         catch (SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
@@ -43,11 +44,11 @@ public class ReserveServlet extends HttpServlet
         }
     }
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", this::manageNoSession, this::deleteReservation);
     }
-    private void deleteReservation(HttpServletRequest request, HttpServletResponse response)
+    private void deleteReservation(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -59,28 +60,30 @@ public class ReserveServlet extends HttpServlet
             else
                 ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Errore", "Link invalido", "Controlla che il link inserito sia quello giusto");
         }
-        catch (ServletException | IOException | SQLException e)
+        catch (IOException | SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", this::manageNoSession, this::reservePoi);
     }
-    private void manageNoSession(HttpServletRequest request, HttpServletResponse response)
+    private void manageNoSession(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
             ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Accesso richiesto", "login", true);
         }
-        catch (IOException | ServletException e)
+        catch (IOException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
-    private void reservePoi(HttpServletRequest request, HttpServletResponse response)
+    private void reservePoi(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -106,9 +109,10 @@ public class ReserveServlet extends HttpServlet
                 ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), "reserve", false);
             }
         }
-        catch (IOException | ServletException e)
+        catch (IOException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
 }

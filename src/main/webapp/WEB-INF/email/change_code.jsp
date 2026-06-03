@@ -2,7 +2,7 @@
 <%@ page contentType="text/html;charset=UTF-8" session="false" %>
 <html>
 <head>
-  <title>Progetto TPSIT - Verifica</title>
+  <title>WordlyReserve - Verifica</title>
 </head>
 <body>
 <h1>Codice per il cambio della password: ${code}</h1>

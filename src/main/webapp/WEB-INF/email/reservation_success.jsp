@@ -7,7 +7,7 @@
 <%@ page contentType="text/html;charset=UTF-8" session="false" %>
 <html>
 <head>
-  <title>Progetto TPSIT - Prenota</title>
+  <title>WordlyReserve - Prenota</title>
   <meta charset="UTF-8">
 </head>
 <body>

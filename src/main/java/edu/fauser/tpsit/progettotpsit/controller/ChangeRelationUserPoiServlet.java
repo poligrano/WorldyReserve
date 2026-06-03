@@ -14,7 +14,7 @@ public class ChangeRelationUserPoiServlet extends HttpServlet
 {
     private DBConnection con;
     @Override
-    public void init()
+    public void init() throws ServletException
     {
         try
         {
@@ -23,6 +23,7 @@ public class ChangeRelationUserPoiServlet extends HttpServlet
         catch (SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
@@ -38,11 +39,11 @@ public class ChangeRelationUserPoiServlet extends HttpServlet
         }
     }
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", (req, resp) -> ServletHelper.restRespond(resp, HttpServletResponse.SC_UNAUTHORIZED, "Nessuna sessione trovata", getServletContext()), this::changeLikeFavRelation);
     }
-    private void changeLikeFavRelation(HttpServletRequest request, HttpServletResponse response)
+    private void changeLikeFavRelation(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -61,11 +62,11 @@ public class ChangeRelationUserPoiServlet extends HttpServlet
         }
     }
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", (req, resp) -> ServletHelper.restRespond(resp, HttpServletResponse.SC_UNAUTHORIZED, "Nessuna sessione trovata", getServletContext()), this::postComment);
     }
-    private void postComment(HttpServletRequest request, HttpServletResponse response)
+    private void postComment(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -81,11 +82,11 @@ public class ChangeRelationUserPoiServlet extends HttpServlet
         }
     }
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response)
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", (req, resp) -> ServletHelper.restRespond(resp, HttpServletResponse.SC_UNAUTHORIZED, "Nessuna sessione trovata", getServletContext()), this::deleteComment);
     }
-    private void deleteComment(HttpServletRequest request, HttpServletResponse response)
+    private void deleteComment(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {

@@ -1,5 +1,7 @@
 package edu.fauser.tpsit.progettotpsit.helper;
 
+import edu.fauser.tpsit.progettotpsit.obj.RequestManager;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,37 +12,37 @@ import java.util.function.BiConsumer;
 public class ServletHelper
 {
     public static String ERROR_PAGE_FOLDER = "errorPage";
-    public static boolean checkParams(HttpServletRequest request, HttpServletResponse response, BiConsumer<HttpServletRequest, HttpServletResponse> onInvalid, BiConsumer<HttpServletRequest, HttpServletResponse> onValid, String... params)
+    public static boolean checkParams(HttpServletRequest request, HttpServletResponse response, RequestManager onInvalid, RequestManager onValid, String... params) throws ServletException
     {
         for (String p : params)
             if (request.getParameter(p) == null || request.getParameter(p).isBlank())
             {
                 if (onInvalid != null)
-                    onInvalid.accept(request, response);
+                    onInvalid.manage(request, response);
                 return false;
             }
         if (onValid != null)
-            onValid.accept(request, response);
+            onValid.manage(request, response);
         return true;
     }
-    public static boolean checkSession(HttpServletRequest request, HttpServletResponse response, String att, BiConsumer<HttpServletRequest, HttpServletResponse> onInvalid, BiConsumer<HttpServletRequest, HttpServletResponse> onValid)
+    public static boolean checkSession(HttpServletRequest request, HttpServletResponse response, String att, RequestManager onInvalid, RequestManager onValid) throws ServletException
     {
 
         if (request.getSession(false) == null || request.getSession(false).getAttribute(att) == null)
         {
             if (onInvalid != null)
-                onInvalid.accept(request, response);
+                onInvalid.manage(request, response);
             return false;
         }
         if (onValid != null)
-            onValid.accept(request, response);
+            onValid.manage(request, response);
         return true;
     }
-    public static boolean checkSession(HttpServletRequest request, String att)
+    public static boolean checkSession(HttpServletRequest request, String att) throws ServletException
     {
         return checkSession(request, null, att, null, null);
     }
-    public static boolean checkParams(HttpServletRequest request, String... params)
+    public static boolean checkParams(HttpServletRequest request, String... params) throws ServletException
     {
         return checkParams(request, null, null, null, params);
     }
@@ -60,7 +62,7 @@ public class ServletHelper
         request.setAttribute("mx", mx);
         request.getRequestDispatcher("custom_page.jsp").forward(request, response);
     }
-    public static void defaultManageExistingSession(HttpServletRequest request, HttpServletResponse response)
+    public static void defaultManageExistingSession(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -69,6 +71,7 @@ public class ServletHelper
         catch (IOException e)
         {
             request.getServletContext().log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     public static void restRespond(HttpServletResponse response, int sc, String message, ServletContext context)
@@ -87,6 +90,7 @@ public class ServletHelper
         catch (IOException e)
         {
             context.log(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 }

@@ -15,7 +15,7 @@ public class StringWrapperResponse extends HttpServletResponseWrapper
         content = new CharArrayWriter();
     }
     @Override
-    public PrintWriter getWriter() throws IOException
+    public PrintWriter getWriter()
     {
         return new PrintWriter(content);
     }

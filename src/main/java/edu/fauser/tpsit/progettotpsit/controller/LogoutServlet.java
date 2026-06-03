@@ -1,7 +1,5 @@
 package edu.fauser.tpsit.progettotpsit.controller;
 
-import edu.fauser.tpsit.progettotpsit.helper.ServletHelper;
-
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;

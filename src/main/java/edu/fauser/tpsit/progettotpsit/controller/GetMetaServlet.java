@@ -14,7 +14,7 @@ public class GetMetaServlet extends HttpServlet
 {
     private DBConnection con;
     @Override
-    public void init()
+    public void init() throws ServletException
     {
         try
         {
@@ -23,6 +23,7 @@ public class GetMetaServlet extends HttpServlet
         catch (SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
@@ -38,11 +39,11 @@ public class GetMetaServlet extends HttpServlet
         }
     }
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", (req, resp) -> ServletHelper.restRespond(resp, HttpServletResponse.SC_UNAUTHORIZED, "Nessuna sessione trovata!", getServletContext()), this::sendMeta);
     }
-    private void sendMeta(HttpServletRequest request, HttpServletResponse response)
+    private void sendMeta(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {

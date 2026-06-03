@@ -26,6 +26,7 @@ public class ChangeProfileServlet extends HttpServlet
         catch (SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
@@ -41,11 +42,11 @@ public class ChangeProfileServlet extends HttpServlet
         }
     }
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", this::manageNoSession, this::sendToChangePage);
     }
-    private void sendToChangePage(HttpServletRequest request, HttpServletResponse response)
+    private void sendToChangePage(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -54,37 +55,40 @@ public class ChangeProfileServlet extends HttpServlet
             request.setAttribute("mx", request.getParameter("mx"));
             request.getRequestDispatcher("change_profile.jsp").forward(request, response);
         }
-        catch (SQLException | ServletException | IOException e)
+        catch (SQLException | IOException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
-    private void manageNoSession(HttpServletRequest request, HttpServletResponse response)
+    private void manageNoSession(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
             ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Accesso richiesto", "login", true);
         }
-        catch (ServletException | IOException e)
+        catch (IOException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", this::manageNoSession, this::updateProfile);
     }
-    private void updateProfile(HttpServletRequest request, HttpServletResponse response)
+    private void updateProfile(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
             con.updateUser((Long) request.getSession().getAttribute("uid"), request.getParameter("name"), request.getParameter("surname"), request.getPart("pfp"));
             response.sendRedirect(response.encodeRedirectURL("changeprofile?mx=Modifica avvenuta"));
         }
-        catch (IOException | SQLException | ServletException e)
+        catch (IOException | SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
 }

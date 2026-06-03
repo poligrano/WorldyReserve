@@ -21,9 +21,9 @@ import java.util.concurrent.ExecutionException;
 @WebServlet(name = "GoogleAPIServlet", value = "/google")
 public class GoogleAPIServlet extends HttpServlet
 {
-    DBConnection con;
+    private DBConnection con;
     @Override
-    public void init()
+    public void init() throws ServletException
     {
         try
         {
@@ -32,6 +32,7 @@ public class GoogleAPIServlet extends HttpServlet
         catch (SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
@@ -47,11 +48,11 @@ public class GoogleAPIServlet extends HttpServlet
         }
     }
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
-        manageUser(request, response);
+        ServletHelper.checkSession(request, response, "uid", this::manageUser, ServletHelper::defaultManageExistingSession);
     }
-    private void manageUser(HttpServletRequest request, HttpServletResponse response)
+    private void manageUser(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -70,9 +71,10 @@ public class GoogleAPIServlet extends HttpServlet
                 ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_CONFLICT, "Utente già esistente", "login", true);
             }
         }
-        catch (SQLException | GeneralSecurityException | IOException | ExecutionException | InterruptedException | ServletException e)
+        catch (SQLException | GeneralSecurityException | IOException | ExecutionException | InterruptedException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
 }

@@ -28,6 +28,7 @@ public class ChangePasswordServlet extends HttpServlet
         catch (SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
@@ -43,16 +44,16 @@ public class ChangePasswordServlet extends HttpServlet
         }
     }
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
-        sendCode(request, response);
+        ServletHelper.checkSession(request, response, "uid", this::sendCode, ServletHelper::defaultManageExistingSession);
     }
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", this::changePass, ServletHelper::defaultManageExistingSession);
     }
-    private void changePass(HttpServletRequest request, HttpServletResponse response)
+    private void changePass(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -61,9 +62,10 @@ public class ChangePasswordServlet extends HttpServlet
             else
                 ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Completa tutti i campi", "change_password", true);
         }
-        catch (IOException | ServletException | SQLException e)
+        catch (IOException | SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     private void manageSC(HttpServletRequest request, HttpServletResponse response, DBConnection.SCVerify sc) throws ServletException, IOException

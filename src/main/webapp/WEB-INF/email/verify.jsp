@@ -3,7 +3,7 @@
 <%@ page contentType="text/html;charset=UTF-8" session="false" %>
 <html>
 <head>
-    <title>Progetto TPSIT - Verifica</title>
+    <title>WordlyReserve - Verifica</title>
 </head>
 <body>
     <em>Clicca il seguente <a href="${verify_URL}?code=${code}">link</a> per procedere alla verifica della tua e-mail</em>

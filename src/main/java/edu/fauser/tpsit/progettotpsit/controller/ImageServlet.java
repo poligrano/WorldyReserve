@@ -25,6 +25,7 @@ public class ImageServlet extends HttpServlet
         catch (SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
@@ -40,11 +41,11 @@ public class ImageServlet extends HttpServlet
         }
     }
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", (req, resp) -> ServletHelper.restRespond(resp, HttpServletResponse.SC_UNAUTHORIZED, "Nessuna sessione trovata!", getServletContext()), this::manageSendImage);
     }
-    private void manageSendImage(HttpServletRequest request, HttpServletResponse response)
+    private void manageSendImage(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         if (ServletHelper.checkParams(request, "id"))
             sendImage(request, response, Long.parseLong(request.getParameter("id")));

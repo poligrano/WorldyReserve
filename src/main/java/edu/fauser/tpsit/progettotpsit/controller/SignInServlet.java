@@ -18,7 +18,7 @@ public class SignInServlet extends HttpServlet
 {
     private DBConnection con;
     @Override
-    public void init()
+    public void init() throws ServletException
     {
         try
         {
@@ -27,6 +27,7 @@ public class SignInServlet extends HttpServlet
         catch (SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
@@ -42,11 +43,11 @@ public class SignInServlet extends HttpServlet
         }
     }
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", this::manageNewSession, ServletHelper::defaultManageExistingSession);
     }
-    private void manageNewSession(HttpServletRequest request, HttpServletResponse response)
+    private void manageNewSession(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -67,17 +68,18 @@ public class SignInServlet extends HttpServlet
                 ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_CONFLICT, "Utente già registrato", "signin", true);
             }
         }
-        catch (IOException | ServletException | SQLException | MessagingException e)
+        catch (IOException | SQLException | MessagingException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         ServletHelper.checkSession(request, response, "uid", this::verifyUser, ServletHelper::defaultManageExistingSession);
     }
-    private void verifyUser(HttpServletRequest request, HttpServletResponse response)
+    private void verifyUser(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
         try
         {
@@ -86,9 +88,10 @@ public class SignInServlet extends HttpServlet
             else
                 ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Verifica", "Link invalido", "Controlla che il link utilizzato sia quello corretto");
         }
-        catch (IOException | ServletException | SQLException e)
+        catch (IOException | SQLException e)
         {
             log(e.getMessage(), e);
+            throw new ServletException(e);
         }
     }
     private void manageSC(HttpServletRequest request, HttpServletResponse response, DBConnection.SCVerify sc) throws ServletException, IOException
