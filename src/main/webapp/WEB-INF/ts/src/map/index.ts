@@ -4,16 +4,14 @@ import TileLayer from 'ol/layer/Tile.js';
 import OSM from 'ol/source/OSM.js';
 import {fromLonLat} from "ol/proj";
 import VectorSource from "ol/source/Vector";
-import {Feature, Geolocation, MapBrowserEvent, Overlay} from "ol";
+import {Feature, MapBrowserEvent, Overlay} from "ol";
 import VectorLayer from "ol/layer/Vector";
 import {Fill, Icon, Stroke, Style} from "ol/style";
 import {Utils} from "./Utils";
 import {manageMapOnMove} from "./MapOnMove";
 import {manageMapOnClick} from "./MapOnClick";
-import {Circle, Geometry} from "ol/geom";
+import {Circle} from "ol/geom";
 import {FavouriteManager} from "./FavouriteManager";
-import {Polyline} from "ol/format";
-import {V} from "ol/renderer/webgl/FlowLayer";
 import {GoToManager} from "./GoToManager";
 
 export const UserName: string = document.getElementById("username")!.textContent;
@@ -38,6 +36,7 @@ function initSearchBarEvents(): void
     const searchDropDownElem: HTMLDivElement = document.getElementById("search-dropdown") as HTMLDivElement;
     const searchDropItemsElem: HTMLDivElement = document.getElementById("search-results") as HTMLDivElement;
     const searchLabelElem: HTMLSpanElement = document.getElementById("result-label") as HTMLSpanElement;
+    const searchLoaderLogoElem: HTMLElement = document.getElementById("loader-logo") as HTMLElement;
     function createFoundElem(found: any): HTMLButtonElement
     {
         const elem: HTMLButtonElement = document.createElement("button");
@@ -60,12 +59,14 @@ function initSearchBarEvents(): void
             controller = new AbortController();
             if (search.length !== 0)
             {
+                searchLoaderLogoElem.style.display = "inherit";
                 searchDropItemsElem.replaceChildren(...(await Utils.querySearchNominatim(search, controller.signal)).map((f: any): HTMLButtonElement => createFoundElem(f)));
                 if (searchDropItemsElem.children.length === 0)
                     searchLabelElem.textContent = "Nessun risultato";
                 else
                     searchLabelElem.textContent = "Risultati";
                 searchDropDownElem.classList.add("open");
+                searchLoaderLogoElem.style.display = "none";
             }
             else
                 searchDropDownElem.classList.remove("open");

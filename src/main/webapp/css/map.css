@@ -161,7 +161,7 @@ header {
     align-items: center;
     gap: 0.6rem;
     padding: 0.7rem 1rem;
-    background: rgba(192, 92, 58, 0.15);
+    background: rgba(192, 92, 58, 0.8);
     border: 1px solid var(--error);
     border-radius: 8px;
     font-size: 0.88rem;
@@ -546,6 +546,7 @@ header {
     box-shadow: 0 0 0 3px rgba(200,121,65,0.12);
 }
 
+.search-wrap img,
 .search-wrap svg {
     width: 15px;
     height: 15px;
@@ -710,6 +711,17 @@ header {
 .summary-value {
     font-weight: 600;
     color: #EAE0D5;
+}
+
+.loader {
+    animation:spin 2s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform:rotate(360deg);
+    }
 }
 
 @media (max-width: 600px) {

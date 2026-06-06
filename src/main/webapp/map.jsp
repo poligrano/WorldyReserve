@@ -26,6 +26,7 @@
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
             <input type="text" id="search-input" class="search-input" placeholder="Cerca un luogo..." autocomplete="off" />
+            <img src="svg/loader-logo.svg" class="loader" id="loader-logo" alt="!" style="display: none" />
         </div>
         <div class="dropdown" id="search-dropdown">
             <span class="dropdown-label" id="result-label">Risultati</span>
@@ -82,49 +83,52 @@
     <div id="map"></div>
 </div>
 <div id="hotel-popup" class="hotel-popup">
-    <div class="popup-header">
-        <div class="popup-header-img">
-            <button class="close-btn" id="popup-close">
-                <i class="fas fa-xmark"></i>
-            </button>
-            <div class="hotel-title-area">
-                <p class="hotel-name" id="popup-name"></p>
-                <span class="hotel-location">
-                    <i class="fas fa-location-dot" style="font-size:12px;"></i>
-                    <span id="popup-address"></span>
-                </span>
+    <img src="svg/loader-logo.svg" class="loader" height="32px" width="32px" id="popup-loader-logo" alt="!" style="display: block; margin: 2rem auto;" />
+    <div id="popup-content" style="display: none">
+        <div class="popup-header">
+            <div class="popup-header-img">
+                <button class="close-btn" id="popup-close">
+                    <i class="fas fa-xmark"></i>
+                </button>
+                <div class="hotel-title-area">
+                    <p class="hotel-name" id="popup-name"></p>
+                    <span class="hotel-location">
+                        <i class="fas fa-location-dot" style="font-size:12px;"></i>
+                        <span id="popup-address"></span>
+                    </span>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="popup-body">
-        <div class="action-bar">
-            <button class="action-btn" id="like-btn">
-                <i class="far fa-heart"></i> Mi Piace <span class="count" id="like-count">0</span>
-            </button>
-            <button class="action-btn" id="fav-btn">
-                <i class="far fa-bookmark"></i> Salva
-            </button>
-        </div>
-        <div class="divider"></div>
-        <div class="comments-section">
-            <p class="section-title"><i class="far fa-comment"></i> Commenti</p>
-            <div id="comments-list"></div>
-            <div class="comment-input-row">
-                <input class="comment-input" id="new-comment" type="text" placeholder="Commenta..." maxlength="255" />
-                <button class="send-btn" id="send-comment-btn">
-                    <i class="fas fa-paper-plane"></i>
+        <div class="popup-body">
+            <div class="action-bar">
+                <button class="action-btn" id="like-btn">
+                    <i class="far fa-heart"></i> Mi Piace <span class="count" id="like-count">0</span>
+                </button>
+                <button class="action-btn" id="fav-btn">
+                    <i class="far fa-bookmark"></i> Salva
                 </button>
             </div>
+            <div class="divider"></div>
+            <div class="comments-section">
+                <p class="section-title"><i class="far fa-comment"></i> Commenti</p>
+                <div id="comments-list"></div>
+                <div class="comment-input-row">
+                    <input class="comment-input" id="new-comment" type="text" placeholder="Commenta..." maxlength="255" />
+                    <button class="send-btn" id="send-comment-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="divider"></div>
-    <div class="popup-footer">
-        <button class="action-btn" id="goto-btn">
-            <i class="fas fa-arrows"></i> Indicazioni
-        </button>
-        <a href="reserve.jsp" class="reserve-btn" id="reserve-btn">
-            <i class="fas fa-calendar-check"></i> Prenota
-        </a>
+        <div class="divider"></div>
+        <div class="popup-footer">
+            <button class="action-btn" id="goto-btn">
+                <i class="fas fa-arrows"></i> Indicazioni
+            </button>
+            <a href="reserve.jsp" class="reserve-btn" id="reserve-btn">
+                <i class="fas fa-calendar-check"></i> Prenota
+            </a>
+        </div>
     </div>
 </div>
 <div id="toast">

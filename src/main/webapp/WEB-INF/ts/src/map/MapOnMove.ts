@@ -49,6 +49,7 @@ export function manageMapOnMove(map: Map, source: VectorSource, layer: VectorLay
     let state: MapLoadState = { status: "idle" };
     async function load(bbox: Extent): Promise<void>
     {
+        map.getViewport().style.cursor = "progress";
         const controller: AbortController = new AbortController();
         const buffered: Extent = bboxBuffer(bbox, map.getView().getZoom()! * bufferFactor);
         state = { status: "loading", bbox: buffered, controller, loaded: state, handle: (async (): Promise<void> =>{
@@ -63,6 +64,7 @@ export function manageMapOnMove(map: Map, source: VectorSource, layer: VectorLay
                     addElementsToSource(source, elements);
                     state = {status: "loaded", bbox: buffered};
                 }
+                map.getViewport().style.cursor = "inherit";
             }
         })()};
     }
