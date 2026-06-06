@@ -149,7 +149,7 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
             overlay.setPosition(undefined);
         popUpLoaderElem.style.display = "inherit";
         popUpContentElem.style.display = "none";
-        if (state.status === "loaded")
+        if (state.status === "loaded" && state.loaded.getProperties().embedded_meta !== undefined)
             Utils.queryUpdateMeta(state.loaded.getId() as number, state.loaded.getProperties().embedded_meta.does_like, state.loaded.getProperties().embedded_meta.favourite).then((r: RestResult)=> {
                 if (!r.ok)
                     Utils.notifyError(r.mx, 4000);
