@@ -22,8 +22,8 @@ export namespace Utils
     {
         console.log("Querying Overpass", bbox);
         const [minLon, minLat, maxLon, maxLat] = bbox;
-        const query = `[out:json][timeout:5];
-                    node(${minLat},${minLon},${maxLat},${maxLon})[tourism=hotel];
+        const query = `[bbox:${minLat},${minLon},${maxLat},${maxLon}][out:json][timeout:5];
+                    node[tourism=hotel];
                     out skel qt;`;
         return fetch("https://overpass-api.de/api/interpreter", {
             method: "POST",

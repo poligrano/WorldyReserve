@@ -92,6 +92,7 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
     const popUpReserveAElem: HTMLAnchorElement = document.getElementById("reserve-btn") as HTMLAnchorElement;
     const popUpContentElem: HTMLDivElement = document.getElementById("popup-content") as HTMLDivElement;
     const popUpLoaderElem:HTMLImageElement = document.getElementById("popup-loader-logo") as HTMLImageElement;
+    const popupElem: HTMLDivElement = document.getElementById("hotel-popup") as HTMLDivElement;
     let state: PopUpState = { status: "idle" };
     (document.getElementById("goto-btn") as HTMLButtonElement).onclick = async (): Promise<void> => {
         if (state.status === "loaded")
@@ -141,12 +142,44 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
             renderFavourite(poi.embedded_meta.favourite);
         }
     }
-    function unload(): void
+    window.addEventListener("resize", () => {
+        const changed: boolean = ((): boolean => {
+            if (!Utils.isMobile())
+            {
+                if (overlay.getElement() === undefined)
+                {
+                    overlay.setElement(popupElem);
+                    return true;
+                }
+            }
+            else if (overlay.getElement() !== undefined)
+            {
+                overlay.setElement(undefined);
+                document.body.append(popupElem);
+                return true;
+            }
+            return false;
+        })();
+        if (state.status === "loaded" && changed)
+            showPopUp(state.loaded.getProperties());
+    })
+    function showPopUp(poi: any): void
     {
-        if (Utils.isMobile())
-            document.getElementById("hotel-popup")!.style.display = "none";
+        if (overlay.getElement() === undefined)
+            popupElem.style.display = "block";
+        else
+            overlay.setPosition(fromLonLat([poi.lon, poi.lat]));
+    }
+    function hidePopUp(): void
+    {
+        if (overlay.getElement() === undefined)
+            popupElem.style.display = "none";
         else
             overlay.setPosition(undefined);
+    }
+    function unload(): void
+    {
+        hidePopUp()
         popUpLoaderElem.style.display = "inherit";
         popUpContentElem.style.display = "none";
         if (state.status === "loaded" && state.loaded.getProperties().embedded_meta !== undefined)
@@ -159,10 +192,7 @@ export function manageMapOnClick(overlay: Overlay): (e: MapBrowserEvent) => void
     async function load(feature: FeatureLike): Promise<void>
     {
         const poi: any = feature.getProperties();
-        if (Utils.isMobile())
-            document.getElementById("hotel-popup")!.style.display = "block";
-        else
-            overlay.setPosition(fromLonLat([poi.lon, poi.lat]));
+        showPopUp(poi);
         const [nominatim, embedded_meta] = await Promise.all([loadNominatim(poi), loadMeta(poi)]);
         saveInFeature(feature as Feature, poi, nominatim, embedded_meta);
         if (state.status === "loaded" && state.loaded === feature)
