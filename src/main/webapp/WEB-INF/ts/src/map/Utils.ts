@@ -12,10 +12,9 @@ export namespace Utils
     export function debounce(callback: Function, timer: number): (...args: any[]) => void
     {
         let t: number;
-        return (...args: any[]): void => {
+        return (...args: Array<any>): void => {
             clearTimeout(t);
-            // @ts-ignore
-            t = setTimeout((): any => callback.apply(...args), timer);
+            t = setTimeout((): any => callback.apply(null, args), timer);
         };
     }
     export async function queryOverpass(bbox: Extent, signal: AbortSignal | null = null): Promise<any>
