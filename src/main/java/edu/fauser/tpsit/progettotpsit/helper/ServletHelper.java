@@ -73,6 +73,18 @@ public class ServletHelper
             throw new ServletException(e);
         }
     }
+    public static void defaultManageNoSession(HttpServletRequest request, HttpServletResponse response) throws ServletException
+    {
+        try
+        {
+            ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Accesso richiesto", "login", true);
+        }
+        catch (IOException e)
+        {
+            request.getServletContext().log(e.getMessage(), e);
+            throw new ServletException(e);
+        }
+    }
     public static void restRespond(HttpServletResponse response, int sc, String message, ServletContext context)
     {
         restRespond(response, sc, message, "text/plain", context);

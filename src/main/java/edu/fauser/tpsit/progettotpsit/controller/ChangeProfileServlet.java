@@ -44,7 +44,7 @@ public class ChangeProfileServlet extends HttpServlet
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
-        ServletHelper.checkSession(request, response, "uid", this::manageNoSession, this::sendToChangePage);
+        ServletHelper.checkSession(request, response, "uid", ServletHelper::defaultManageNoSession, this::sendToChangePage);
     }
     private void sendToChangePage(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
@@ -61,22 +61,10 @@ public class ChangeProfileServlet extends HttpServlet
             throw new ServletException(e);
         }
     }
-    private void manageNoSession(HttpServletRequest request, HttpServletResponse response) throws ServletException
-    {
-        try
-        {
-            ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Accesso richiesto", "login", true);
-        }
-        catch (IOException e)
-        {
-            log(e.getMessage(), e);
-            throw new ServletException(e);
-        }
-    }
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
-        ServletHelper.checkSession(request, response, "uid", this::manageNoSession, this::updateProfile);
+        ServletHelper.checkSession(request, response, "uid", ServletHelper::defaultManageNoSession, this::updateProfile);
     }
     private void updateProfile(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {

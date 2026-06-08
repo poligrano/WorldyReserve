@@ -41,7 +41,7 @@ public class LoaderServlet extends HttpServlet
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
-        ServletHelper.checkSession(request, response, "uid", this::manageNoSession, this::load);
+        ServletHelper.checkSession(request, response, "uid", ServletHelper::defaultManageExistingSession, this::load);
     }
     private void load(HttpServletRequest request, HttpServletResponse response) throws ServletException
     {
@@ -52,18 +52,6 @@ public class LoaderServlet extends HttpServlet
             request.getRequestDispatcher("map.jsp").forward(request, response);
         }
         catch (SQLException | IOException e)
-        {
-            log(e.getMessage(), e);
-            throw new ServletException(e);
-        }
-    }
-    private void manageNoSession(HttpServletRequest request, HttpServletResponse response) throws ServletException
-    {
-        try
-        {
-            ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Accesso richiesto", "login", true);
-        }
-        catch (IOException e)
         {
             log(e.getMessage(), e);
             throw new ServletException(e);
