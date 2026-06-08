@@ -1,4 +1,4 @@
-package edu.fauser.tpsit.progettotpsit.obj;
+package edu.fauser.tpsit.progettotpsit.interfaces;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
