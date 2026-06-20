@@ -87,7 +87,7 @@ public class ReserveServlet extends HttpServlet
                     request.setAttribute("id", id);
                     request.setAttribute("verify_URL", request.getRequestURL().toString());
                     MailHelper.sendMail(con.retrieveEmail((Long) request.getSession().getAttribute("uid")), "Prenotazione Completata", request, response, "WEB-INF/email/reservation_success.jsp");
-                    ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_OK, "Prenotazione Completata", "Grazie per aver prenotato tramite il nostro servizio", "Una email di conferma è stata inviata al tuo indirizzo");
+                    ServletHelper.redirectCustomPage(request, response, HttpServletResponse.SC_OK, "Prenotazione Completata", "Grazie per aver prenotato tramite il nostro servizio", "Un'email di conferma è stata inviata al tuo indirizzo");
                 }
                 else
                     ServletHelper.redirectErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Completa tutti i campi", "reserve", false);

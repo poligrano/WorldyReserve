@@ -25,10 +25,10 @@
     <p>Completa la tua prenotazione all'hotel ${param.name}</p>
   </div>
   <form action="reserve" method="post" onsubmit="return Utils.onSubmitCheck()">
-    <input type="text" name="id" value="${param.id}" hidden />
-    <input type="text" name="name" value="${param.name}" hidden />
-    <input type="text" name="start-epoch" id="start-val" hidden />
-    <input type="text" name="end-epoch" id="end-val" hidden />
+    <input type="hidden" name="id" value="${param.id}" />
+    <input type="hidden" name="name" value="${param.name}" />
+    <input type="hidden" name="start-epoch" id="start-val" />
+    <input type="hidden" name="end-epoch" id="end-val" />
     <div class="form-group">
       <label for="start">Dal giorno</label>
       <input id="start" name="start" type="datetime-local" required />
