@@ -37,5 +37,5 @@ build/
 
 ### Mac OS ###
 .DS_Store
-
+src/main/webapp/WEB-INF/ts/node_modules
 .env
